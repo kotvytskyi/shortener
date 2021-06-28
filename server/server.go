@@ -1,0 +1,69 @@
+package server
+
+import (
+	"context"
+	"encoding/json"
+	"fmt"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/gorilla/mux"
+)
+
+type Key struct {
+	Value string `json:"val" bson:"val"`
+	Used  bool   `json:"-" bson:"used"`
+}
+
+type HttpServer struct {
+	Port        int
+	DataService DataService
+}
+
+type DataService interface {
+	ReserveKey(ctx context.Context) (*Key, error)
+}
+
+func (s *HttpServer) Run(ctx context.Context) error {
+	log.Printf("[INFO] Starting REST server on port: %d", s.Port)
+
+	router := s.router()
+	srv := http.Server{
+		Addr:         fmt.Sprintf(":%d", s.Port),
+		Handler:      router,
+		WriteTimeout: 30 * time.Second,
+		ReadTimeout:  30 * time.Second,
+	}
+
+	go func() {
+		<-ctx.Done()
+		if e := srv.Close(); e != nil {
+			log.Printf("[WARN] failed to close http server, %v", e)
+		}
+	}()
+
+	return srv.ListenAndServe()
+}
+
+func (s *HttpServer) router() *mux.Router {
+	r := mux.NewRouter()
+
+	r.HandleFunc("/api/keys", s.reserveKeyHandler).Methods("POST")
+
+	return r
+}
+
+func (s *HttpServer) reserveKeyHandler(rw http.ResponseWriter, h *http.Request) {
+	rw.Header().Add("Content-Type", "application/json")
+
+	key, err := s.DataService.ReserveKey(context.Background())
+	if err != nil {
+		rw.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(rw).Encode(struct{ Err string }{Err: err.Error()})
+		return
+	}
+
+	rw.WriteHeader(http.StatusOK)
+	json.NewEncoder(rw).Encode(struct{ Key string }{Key: string(key.Value)})
+}
