@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"regexp"
 	"testing"
 
 	"github.com/kotvytskyi/shortener/testutils"
@@ -31,7 +33,7 @@ func TestApiShort(t *testing.T) {
 		{
 			Url:      "http://www.google.com",
 			Short:    "short_google_url",
-			Expected: ExpectedResult{Status: http.StatusCreated, Url: "short_google_url"},
+			Expected: ExpectedResult{Status: http.StatusCreated, Url: "/short/short_google_url"},
 		},
 	}
 
@@ -62,10 +64,35 @@ func TestApiShort(t *testing.T) {
 			short := &CreatedResponse{}
 			json.NewDecoder(resp.Body).Decode(short)
 
-			assert.Equal(t, ShortUrl(httpServer, test.Expected.Url), short.Url)
+			url, err := url.Parse(short.Url)
+			assert.Nil(t, err)
+
+			assert.Equal(t, test.Expected.Url, url.Path)
 			assert.NotNil(t, short)
 		})
 	}
+
+	t.Run("generates random path when short is empty", func(t *testing.T) {
+		restServer, teardown := CreateTestServer(t)
+		defer teardown()
+
+		httpServer := httptest.NewServer(restServer.router())
+
+		request := CreateShortRequest{
+			URL: "http://www.google.com",
+		}
+		rBytes, _ := json.Marshal(request)
+
+		resp, err := http.Post(httpServer.URL+"/api/shorts", "application/json", bytes.NewBuffer(rBytes))
+		assert.Nil(t, err)
+
+		short := &CreatedResponse{}
+		json.NewDecoder(resp.Body).Decode(short)
+
+		matched, err := regexp.MatchString("/short/.+", short.Url)
+		assert.Nil(t, err)
+		assert.True(t, matched)
+	})
 }
 
 func CreateTestServer(t *testing.T) (*RestServer, func()) {
@@ -78,8 +105,4 @@ func CreateTestServer(t *testing.T) (*RestServer, func()) {
 	restServer.ShortService = service
 
 	return restServer, teardown
-}
-
-func ShortUrl(s *httptest.Server, url string) string {
-	return s.URL + "/short/" + url
 }
