@@ -1,4 +1,4 @@
-package generator
+package app
 
 import (
 	"math/rand"

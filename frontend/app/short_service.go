@@ -5,12 +5,16 @@ import (
 	"net/http"
 )
 
-type ShortRepository interface {
+type UrlRepository interface {
 	Create(ctx context.Context, url string, short string) error
 }
 
+type ShortClient interface {
+	Generate(ctx context.Context) (string, error)
+}
+
 type AppShortService struct {
-	Repository ShortRepository
+	Repository UrlRepository
 }
 
 func (s *AppShortService) Create(ctx context.Context, urlToShort string, short string) error {
