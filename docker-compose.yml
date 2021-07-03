@@ -1,0 +1,33 @@
+version: '3.9'
+services:
+    shortgen:
+        build: ./shortgen
+        environment:
+            - MONGO=mongo
+            - MONGO_USER=root
+            - MONGO_PASS=pass
+    shortsrv:
+        build: ./shortsrv
+        environment:
+            - MONGO=mongo
+            - MONGO_USER=root
+            - MONGO_PASS=pass
+        ports: 
+            - "8000:8080"
+    frontend:
+        build: ./frontend
+        environment:
+            - MONGO=mongo
+            - MONGO_USER=root
+            - MONGO_PASS=pass
+        ports:
+            - "8001:8080"
+
+    mongo:
+        image: mongo
+        restart: always
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=root
+            - MONGO_INITDB_ROOT_PASSWORD=pass
+        ports:
+            - "27018:27017"

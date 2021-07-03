@@ -40,7 +40,10 @@ type RestServer struct {
 func NewRestServer(ctx context.Context) (*RestServer, error) {
 	service := &AppShortService{}
 
-	repository, err := NewMongoShortRepository(MongoParams{Endpoint: os.Getenv("MONGO")})
+	mongoaddr := os.Getenv("MONGO")
+	mongousr := os.Getenv("MONGO_USER")
+	mongopass := os.Getenv("MONGO_PASS")
+	repository, err := NewMongoShortRepository(MongoParams{Endpoint: fmt.Sprintf("mongodb://%s:%s@%s:27017", mongousr, mongopass, mongoaddr)})
 	if err != nil {
 		return nil, err
 	}

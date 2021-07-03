@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
-	"strconv"
 
 	"github.com/joho/godotenv"
 	"github.com/kotvytskyi/shortsrv/app"
@@ -12,15 +12,19 @@ import (
 
 func main() {
 	godotenv.Load()
+
+	mongoaddr := os.Getenv("MONGO")
+	mongousr := os.Getenv("MONGO_USER")
+	mongopass := os.Getenv("MONGO_PASS")
 	serverMongo, err := app.NewMongo(app.MongoConfig{
-		Endpoint: os.Getenv("MONGO"),
+		Endpoint: fmt.Sprintf("mongodb://%s:%s@%s:27017", mongousr, mongopass, mongoaddr),
 	})
 	if err != nil {
 		panic(err)
 	}
 
 	httpServer := app.HttpServer{
-		Port:        getPort(),
+		Port:        8080,
 		DataService: serverMongo,
 	}
 
@@ -28,18 +32,4 @@ func main() {
 	if err != nil {
 		log.Printf("Http server was terminated: %v", err)
 	}
-}
-
-func getPort() int {
-	pEnv := os.Getenv("REST_PORT")
-	if pEnv == "" {
-		pEnv = "8080"
-	}
-
-	port, err := strconv.ParseInt(pEnv, 10, 64)
-	if err != nil {
-		panic(err)
-	}
-
-	return int(port)
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 
 	"github.com/joho/godotenv"
@@ -11,8 +12,11 @@ import (
 func main() {
 	godotenv.Load()
 
+	mongoaddr := os.Getenv("MONGO")
+	mongousr := os.Getenv("MONGO_USER")
+	mongopass := os.Getenv("MONGO_PASS")
 	generatorMongo, err := app.NewMongo(app.MongoConfig{
-		Endpoint: os.Getenv("MONGO"),
+		Endpoint: fmt.Sprintf("mongodb://%s:%s@%s:27017", mongousr, mongopass, mongoaddr),
 	})
 	if err != nil {
 		panic(err)
@@ -20,13 +24,8 @@ func main() {
 
 	scheduler := app.NewScheduler(generatorMongo)
 
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	go func() {
-		err = scheduler.Schedule(ctx)
-		if err != nil {
-			panic(err)
-		}
-	}()
+	err = scheduler.Schedule(context.Background())
+	if err != nil {
+		panic(err)
+	}
 }
