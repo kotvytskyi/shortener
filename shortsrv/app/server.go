@@ -48,6 +48,7 @@ func (s *HttpServer) Run(ctx context.Context) error {
 
 func (s *HttpServer) router() *mux.Router {
 	r := mux.NewRouter()
+	r.Use(loggingMiddleware)
 
 	r.HandleFunc("/api/keys", s.reserveKeyHandler).Methods("POST")
 
@@ -66,4 +67,24 @@ func (s *HttpServer) reserveKeyHandler(rw http.ResponseWriter, h *http.Request) 
 
 	rw.WriteHeader(http.StatusOK)
 	json.NewEncoder(rw).Encode(struct{ Key string }{Key: string(key.Value)})
+}
+
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func NewLoggingResponseWriter(rw http.ResponseWriter) *loggingResponseWriter {
+	return &loggingResponseWriter{rw, http.StatusOK}
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		log.Printf("[%s] %s", r.Method, r.URL.Path)
+
+		lrw := NewLoggingResponseWriter(rw)
+		next.ServeHTTP(lrw, r)
+
+		log.Printf("[%s] %s - %d", r.Method, r.URL.Path, lrw.statusCode)
+	})
 }
