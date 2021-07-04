@@ -11,5 +11,5 @@ RUN CGO_ENABLED=0 go build -o ./out/frontend .
 
 FROM alpine:latest
 COPY --from=builder /app/out/frontend /app/frontend
-EXPOSE 8080
+EXPOSE 80
 CMD ["/app/frontend"]

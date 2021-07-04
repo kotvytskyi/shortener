@@ -28,7 +28,7 @@ type CreatedResponse struct {
 }
 
 type ShortService interface {
-	Create(ctx context.Context, urlToShort string, short string) error
+	Create(ctx context.Context, urlToShort string, short string) (string, error)
 	CreateShortURL(r *http.Request, short string) string
 }
 
@@ -38,7 +38,6 @@ type RestServer struct {
 }
 
 func NewRestServer(ctx context.Context) (*RestServer, error) {
-	service := &AppShortService{}
 
 	mongoaddr := os.Getenv("MONGO")
 	mongousr := os.Getenv("MONGO_USER")
@@ -47,7 +46,12 @@ func NewRestServer(ctx context.Context) (*RestServer, error) {
 	if err != nil {
 		return nil, err
 	}
-	service.Repository = repository
+
+	api, err := NewShortApi(os.Getenv("SHORTSRV"))
+	if err != nil {
+		return nil, err
+	}
+	service := NewShortService(repository, api)
 
 	server := &RestServer{
 		Port:         getPort(),
@@ -104,13 +108,13 @@ func (s *RestServer) createShortHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = s.ShortService.Create(context.Background(), request.URL, request.Short)
+	short, err := s.ShortService.Create(context.Background(), request.URL, request.Short)
 	if err != nil {
 		RespondWithError(w, http.StatusInternalServerError, "oops! an error occurred. please, try again later or contact the support")
 		return
 	}
 
-	shortURL := s.ShortService.CreateShortURL(r, request.Short)
+	shortURL := s.ShortService.CreateShortURL(r, short)
 
 	RespondCreated(w, shortURL)
 }
@@ -133,7 +137,7 @@ func RespondWithError(w http.ResponseWriter, status int, reason string) {
 func getPort() int {
 	pEnv := os.Getenv("REST_PORT")
 	if pEnv == "" {
-		pEnv = "8080"
+		pEnv = "80"
 	}
 
 	port, err := strconv.ParseInt(pEnv, 10, 64)

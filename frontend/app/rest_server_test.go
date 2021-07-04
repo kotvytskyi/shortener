@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/url"
+	"os"
 	"regexp"
 	"testing"
 
+	"github.com/joho/godotenv"
 	"github.com/kotvytskyi/shortener/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,7 +29,9 @@ type ExpectedResult struct {
 }
 
 func TestApiShort(t *testing.T) {
-	testCases := []TestCase{
+	godotenv.Load()
+
+	cases := []TestCase{
 		{Url: "", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is missing."}},
 		{Url: "i'm not a url", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is malformed."}},
 		{
@@ -37,7 +41,7 @@ func TestApiShort(t *testing.T) {
 		},
 	}
 
-	for _, test := range testCases {
+	for _, test := range cases {
 		t.Run("", func(t *testing.T) {
 			restServer, teardown := CreateTestServer(t)
 			defer teardown()
@@ -99,8 +103,14 @@ func CreateTestServer(t *testing.T) (*RestServer, func()) {
 	coll, teardown := testutils.CreateTestMongoConnection(t)
 
 	restServer := &RestServer{}
-	service := &AppShortService{}
 	repo := &MongoShortRepository{coll}
+	api, err := NewShortApi(os.Getenv("SHORTSRV"))
+	if err != nil {
+		panic(err)
+	}
+
+	service := NewShortService(repo, api)
+
 	service.Repository = repo
 	restServer.ShortService = service
 
