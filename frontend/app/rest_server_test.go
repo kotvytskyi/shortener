@@ -11,7 +11,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/kotvytskyi/frontend/app/repository"
+	"github.com/kotvytskyi/frontend/app/mongo"
 	"github.com/kotvytskyi/shortener/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -107,7 +107,7 @@ func CreateTestServer(t *testing.T) (*RestServer, func()) {
 	if err != nil {
 		panic(err)
 	}
-	r := &repository.Short{Coll: c}
+	r := &mongo.Short{Coll: c}
 
 	s := NewShorter(r, api)
 	restServer := &RestServer{ShortService: s}

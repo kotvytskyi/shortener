@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/kotvytskyi/frontend/app/repository"
+	"github.com/kotvytskyi/frontend/app/mongo"
 )
 
 type ErrorResponse struct {
@@ -108,8 +108,8 @@ func respondWithError(w http.ResponseWriter, status int, reason string) {
 }
 
 func createRepository() UrlRepository {
-	p := repository.NewParams(os.Getenv("MONGO"), os.Getenv("MONGO_USER"), os.Getenv("MONGO_PASS"))
-	r, err := repository.NewShort(p)
+	p := mongo.NewParams(os.Getenv("MONGO"), os.Getenv("MONGO_USER"), os.Getenv("MONGO_PASS"))
+	r, err := mongo.NewShort(p)
 	if err != nil {
 		log.Fatalf("cannot create repository: %v", err)
 	}
