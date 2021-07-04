@@ -2,12 +2,11 @@ package server
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
-	"os"
-	"regexp"
 	"testing"
 
 	"github.com/joho/godotenv"
@@ -17,101 +16,78 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type TestCase struct {
-	Url      string
-	Short    string
-	Expected ExpectedResult
-}
-
-type ExpectedResult struct {
-	Error  string
-	Status int
-	Url    string
-	Short  string
-}
-
 func TestApiShort(t *testing.T) {
 	godotenv.Load()
 
-	cases := []TestCase{
-		{Url: "", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is missing"}},
-		{Url: "i'm not a url", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is malformed"}},
-		{
-			Url:      "http://www.google.com",
-			Short:    "short_google_url",
-			Expected: ExpectedResult{Status: http.StatusCreated, Url: "/short/short_google_url"},
-		},
+	cases := []struct {
+		name       string
+		url, short string
+
+		status   int
+		response string
+
+		apiMock string
+	}{
+		{name: "Empty URL", url: "", short: "", status: http.StatusBadRequest, response: "url field is missing"},
+		{name: "Malformed URL", url: "notAURL", short: "", status: http.StatusBadRequest, response: "url field is malformed"},
+		{name: "Custom short", url: "http://www.google.com", short: "ggl", status: http.StatusCreated, response: "/short/ggl"},
+		{name: "Empty short", url: "http://www.google.com", short: "", status: http.StatusCreated, response: "/short/abc123", apiMock: "abc123"},
 	}
 
 	for _, test := range cases {
-		t.Run("", func(t *testing.T) {
-			server, teardown := CreateTestServer(t)
+		t.Run(test.name, func(t *testing.T) {
+			server, teardown := CreateTestServer(t, test.apiMock)
 			defer teardown()
 
-			httpServer := httptest.NewServer(server.router())
+			srv := httptest.NewServer(server.router())
+			defer srv.Close()
 
 			request := CreateShortRequest{
-				URL:   test.Url,
-				Short: test.Short,
+				URL:   test.url,
+				Short: test.short,
 			}
 			rBytes, _ := json.Marshal(request)
 
-			resp, err := http.Post(httpServer.URL+"/api/shorts", "application/json", bytes.NewBuffer(rBytes))
+			resp, err := http.Post(srv.URL+"/api/shorts", "application/json", bytes.NewBuffer(rBytes))
 			assert.Nil(t, err)
-			assert.Equal(t, test.Expected.Status, resp.StatusCode)
+			assert.Equal(t, test.status, resp.StatusCode)
 
 			if resp.StatusCode >= 400 {
 				eResp := &errorResponse{}
 				json.NewDecoder(resp.Body).Decode(eResp)
-				assert.Equal(t, eResp.Error, test.Expected.Error)
+				assert.Equal(t, eResp.Error, test.response)
 				return
 			}
 
-			short := &createdResponse{}
-			json.NewDecoder(resp.Body).Decode(short)
+			r := &createdResponse{}
+			json.NewDecoder(resp.Body).Decode(r)
 
-			url, err := url.Parse(short.Url)
+			u, err := url.Parse(r.Url)
 			assert.Nil(t, err)
 
-			assert.Equal(t, test.Expected.Url, url.Path)
-			assert.NotNil(t, short)
+			assert.Equal(t, test.response, u.Path)
 		})
 	}
-
-	t.Run("generates random path when short is empty", func(t *testing.T) {
-		restServer, teardown := CreateTestServer(t)
-		defer teardown()
-
-		httpServer := httptest.NewServer(restServer.router())
-
-		request := CreateShortRequest{
-			URL: "http://www.google.com",
-		}
-		rBytes, _ := json.Marshal(request)
-
-		resp, err := http.Post(httpServer.URL+"/api/shorts", "application/json", bytes.NewBuffer(rBytes))
-		assert.Nil(t, err)
-
-		short := &createdResponse{}
-		json.NewDecoder(resp.Body).Decode(short)
-
-		matched, err := regexp.MatchString("/short/.+", short.Url)
-		assert.Nil(t, err)
-		assert.True(t, matched)
-	})
 }
 
-func CreateTestServer(t *testing.T) (*RestServer, func()) {
+func CreateTestServer(t *testing.T, mockedShort string) (*RestServer, func()) {
+	t.Helper()
+
 	c, teardown := testutils.CreateTestMongoConnection(t)
 
-	api, err := shorter.NewShortApi(os.Getenv("SHORTSRV"))
-	if err != nil {
-		panic(err)
-	}
+	api := &MockedApi{mockedShort: mockedShort}
 	r := &mongo.Short{Coll: c}
 
 	s := shorter.NewShorter(r, api)
 	restServer := &RestServer{ShortService: s}
 
 	return restServer, teardown
+}
+
+type MockedApi struct {
+	mockedShort string
+}
+
+func (a *MockedApi) Get(ctx context.Context) (string, error) {
+	return a.mockedShort, nil
 }
