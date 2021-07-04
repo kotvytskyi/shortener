@@ -6,18 +6,12 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/kotvytskyi/frontend/app/repository"
 )
-
-type CreateShortRequest struct {
-	URL   string `json:"url"`
-	Short string `json:"short"`
-}
 
 type ErrorResponse struct {
 	Error string `json:"error"`
@@ -28,7 +22,7 @@ type CreatedResponse struct {
 }
 
 type ShortService interface {
-	Create(ctx context.Context, urlToShort string, short string) (string, error)
+	Short(ctx context.Context, urlToShort string, short string) (string, error)
 	CreateShortURL(r *http.Request, short string) string
 }
 
@@ -37,37 +31,22 @@ type RestServer struct {
 	ShortService ShortService
 }
 
-func NewRestServer(ctx context.Context) (*RestServer, error) {
+func NewRestServer(ctx context.Context) *RestServer {
+	r := createRepository()
+	a := createApi()
 
-	mongoaddr := os.Getenv("MONGO")
-	mongousr := os.Getenv("MONGO_USER")
-	mongopass := os.Getenv("MONGO_PASS")
-	repository, err := NewMongoShortRepository(MongoParams{Endpoint: fmt.Sprintf("mongodb://%s:%s@%s:27017", mongousr, mongopass, mongoaddr)})
-	if err != nil {
-		return nil, err
+	return &RestServer{
+		Port:         80,
+		ShortService: NewShorter(r, a),
 	}
-
-	api, err := NewShortApi(os.Getenv("SHORTSRV"))
-	if err != nil {
-		return nil, err
-	}
-	service := NewShortService(repository, api)
-
-	server := &RestServer{
-		Port:         getPort(),
-		ShortService: service,
-	}
-
-	return server, nil
 }
 
 func (s *RestServer) Run(ctx context.Context) error {
 	log.Printf("[INFO] Starting REST server on port: %d", s.Port)
 
-	router := s.router()
 	srv := http.Server{
 		Addr:         fmt.Sprintf(":%d", s.Port),
-		Handler:      router,
+		Handler:      s.router(),
 		WriteTimeout: 30 * time.Second,
 		ReadTimeout:  30 * time.Second,
 	}
@@ -86,64 +65,63 @@ func (s *RestServer) router() *mux.Router {
 	r := mux.NewRouter()
 
 	r.HandleFunc("/api/shorts", s.createShortHandler).Methods("POST")
-	r.HandleFunc("/short/{short}", s.createShortHandler).Methods("GET")
+	r.HandleFunc("/short/{short}", s.shortProxyHandler).Methods("GET")
 
 	return r
 }
 
 func (s *RestServer) createShortHandler(w http.ResponseWriter, r *http.Request) {
-	request := &CreateShortRequest{}
-	json.NewDecoder(r.Body).Decode(request)
+	w.Header().Add("Content-Type", "application/json") // move to middleware
 
-	w.Header().Add("Content-Type", "application/json")
+	req := &CreateShortRequest{}
+	json.NewDecoder(r.Body).Decode(req)
 
-	if request.URL == "" {
-		RespondWithError(w, http.StatusBadRequest, "url field is missing.")
-		return
-	}
-
-	_, err := url.ParseRequestURI(request.URL)
+	err := req.Validate()
 	if err != nil {
-		RespondWithError(w, http.StatusBadRequest, "url field is malformed.")
+		respondWithError(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
-	short, err := s.ShortService.Create(context.Background(), request.URL, request.Short)
+	short, err := s.ShortService.Short(context.Background(), req.URL, req.Short)
 	if err != nil {
-		RespondWithError(w, http.StatusInternalServerError, "oops! an error occurred. please, try again later or contact the support")
+		respondWithError(w, http.StatusInternalServerError, "oops! an error occurred. please, try again later or contact the support")
 		return
 	}
 
-	shortURL := s.ShortService.CreateShortURL(r, short)
-
-	RespondCreated(w, shortURL)
+	sURL := s.ShortService.CreateShortURL(r, short)
+	respondCreated(w, sURL)
 }
 
 func (s *RestServer) shortProxyHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func RespondCreated(w http.ResponseWriter, url string) {
+func respondCreated(w http.ResponseWriter, url string) {
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(CreatedResponse{Url: url})
 }
 
-func RespondWithError(w http.ResponseWriter, status int, reason string) {
+func respondWithError(w http.ResponseWriter, status int, reason string) {
 	w.WriteHeader(status)
 	errResponse := &ErrorResponse{Error: reason}
 	json.NewEncoder(w).Encode(errResponse)
 }
 
-func getPort() int {
-	pEnv := os.Getenv("REST_PORT")
-	if pEnv == "" {
-		pEnv = "80"
-	}
-
-	port, err := strconv.ParseInt(pEnv, 10, 64)
+func createRepository() UrlRepository {
+	p := repository.NewParams(os.Getenv("MONGO"), os.Getenv("MONGO_USER"), os.Getenv("MONGO_PASS"))
+	r, err := repository.NewShort(p)
 	if err != nil {
-		panic(err)
+		log.Fatalf("cannot create repository: %v", err)
 	}
 
-	return int(port)
+	return r
+}
+
+func createApi() ShortApi {
+	api, err := NewShortApi(os.Getenv("SHORTSRV"))
+	if err != nil {
+		log.Fatalf("cannot create api: %v", err)
+	}
+
+	return api
 }

@@ -1,4 +1,4 @@
-package app
+package repository
 
 import (
 	"context"
@@ -13,7 +13,7 @@ func TestCreate(t *testing.T) {
 	coll, teardown := testutils.CreateTestMongoConnection(t)
 	defer teardown()
 
-	repo := MongoShortRepository{coll}
+	repo := Short{coll}
 
 	err := repo.Create(context.Background(), "test_url", "test_short")
 	assert.Nil(t, err)

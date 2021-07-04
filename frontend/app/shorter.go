@@ -14,20 +14,20 @@ type ShortApi interface {
 	Get(ctx context.Context) (string, error)
 }
 
-type AppShortService struct {
+type Shorter struct {
 	Repository UrlRepository
 	ShortApi   ShortApi
 }
 
-func NewShortService(r UrlRepository, a ShortApi) *AppShortService {
-	s := &AppShortService{}
+func NewShorter(r UrlRepository, a ShortApi) *Shorter {
+	s := &Shorter{}
 	s.Repository = r
 	s.ShortApi = a
 	return s
 }
 
-func (s *AppShortService) Create(ctx context.Context, urlToShort string, short string) (string, error) {
-	if short == "" {
+func (s *Shorter) Short(ctx context.Context, from string, to string) (shortened string, err error) {
+	if to == "" {
 		ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 		defer cancel()
 
@@ -36,14 +36,14 @@ func (s *AppShortService) Create(ctx context.Context, urlToShort string, short s
 			return "", err
 		}
 
-		short = s
+		to = s
 	}
 
-	err := s.Repository.Create(ctx, urlToShort, short)
-	return short, err
+	err = s.Repository.Create(ctx, from, to)
+	return to, err
 }
 
-func (s *AppShortService) CreateShortURL(r *http.Request, short string) string {
+func (s *Shorter) CreateShortURL(r *http.Request, short string) string {
 	// solve tests https issues
 	return "http://" + r.Host + "/short/" + short
 }

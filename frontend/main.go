@@ -11,12 +11,8 @@ import (
 func main() {
 	godotenv.Load()
 
-	server, err := app.NewRestServer(context.Background())
-	if err != nil {
-		panic(err)
-	}
-
-	err = server.Run(context.Background())
+	srv := app.NewRestServer(context.Background())
+	err := srv.Run(context.Background())
 	if err != nil {
 		log.Fatalf("An error occurred in http server: %v", err)
 	}

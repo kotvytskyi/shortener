@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
+	"github.com/kotvytskyi/frontend/app/repository"
 	"github.com/kotvytskyi/shortener/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -43,10 +44,10 @@ func TestApiShort(t *testing.T) {
 
 	for _, test := range cases {
 		t.Run("", func(t *testing.T) {
-			restServer, teardown := CreateTestServer(t)
+			server, teardown := CreateTestServer(t)
 			defer teardown()
 
-			httpServer := httptest.NewServer(restServer.router())
+			httpServer := httptest.NewServer(server.router())
 
 			request := CreateShortRequest{
 				URL:   test.Url,
@@ -100,19 +101,16 @@ func TestApiShort(t *testing.T) {
 }
 
 func CreateTestServer(t *testing.T) (*RestServer, func()) {
-	coll, teardown := testutils.CreateTestMongoConnection(t)
+	c, teardown := testutils.CreateTestMongoConnection(t)
 
-	restServer := &RestServer{}
-	repo := &MongoShortRepository{coll}
 	api, err := NewShortApi(os.Getenv("SHORTSRV"))
 	if err != nil {
 		panic(err)
 	}
+	r := &repository.Short{Coll: c}
 
-	service := NewShortService(repo, api)
-
-	service.Repository = repo
-	restServer.ShortService = service
+	s := NewShorter(r, api)
+	restServer := &RestServer{ShortService: s}
 
 	return restServer, teardown
 }

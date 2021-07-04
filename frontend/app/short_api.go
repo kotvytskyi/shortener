@@ -14,7 +14,7 @@ type Key struct {
 }
 
 type AppShortApi struct {
-	baseUrl *url.URL
+	base *url.URL
 }
 
 func NewShortApi(baseUrl string) (*AppShortApi, error) {
@@ -26,7 +26,7 @@ func NewShortApi(baseUrl string) (*AppShortApi, error) {
 }
 
 func (c *AppShortApi) Get(ctx context.Context) (string, error) {
-	req, err := http.NewRequest("POST", "http://"+c.baseUrl.String()+"/api/keys", bytes.NewBuffer([]byte{}))
+	req, err := http.NewRequest("POST", "http://"+c.base.String()+"/api/keys", bytes.NewBuffer([]byte{}))
 	if err != nil {
 		return "", err
 	}
