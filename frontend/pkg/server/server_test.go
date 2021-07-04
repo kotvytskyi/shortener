@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"bytes"
@@ -11,7 +11,8 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
-	"github.com/kotvytskyi/frontend/app/mongo"
+	"github.com/kotvytskyi/frontend/pkg/mongo"
+	"github.com/kotvytskyi/frontend/pkg/shorter"
 	"github.com/kotvytskyi/shortener/testutils"
 	"github.com/stretchr/testify/assert"
 )
@@ -33,8 +34,8 @@ func TestApiShort(t *testing.T) {
 	godotenv.Load()
 
 	cases := []TestCase{
-		{Url: "", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is missing."}},
-		{Url: "i'm not a url", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is malformed."}},
+		{Url: "", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is missing"}},
+		{Url: "i'm not a url", Expected: ExpectedResult{Status: http.StatusBadRequest, Error: "url field is malformed"}},
 		{
 			Url:      "http://www.google.com",
 			Short:    "short_google_url",
@@ -60,13 +61,13 @@ func TestApiShort(t *testing.T) {
 			assert.Equal(t, test.Expected.Status, resp.StatusCode)
 
 			if resp.StatusCode >= 400 {
-				eResp := &ErrorResponse{}
+				eResp := &errorResponse{}
 				json.NewDecoder(resp.Body).Decode(eResp)
 				assert.Equal(t, eResp.Error, test.Expected.Error)
 				return
 			}
 
-			short := &CreatedResponse{}
+			short := &createdResponse{}
 			json.NewDecoder(resp.Body).Decode(short)
 
 			url, err := url.Parse(short.Url)
@@ -91,7 +92,7 @@ func TestApiShort(t *testing.T) {
 		resp, err := http.Post(httpServer.URL+"/api/shorts", "application/json", bytes.NewBuffer(rBytes))
 		assert.Nil(t, err)
 
-		short := &CreatedResponse{}
+		short := &createdResponse{}
 		json.NewDecoder(resp.Body).Decode(short)
 
 		matched, err := regexp.MatchString("/short/.+", short.Url)
@@ -103,13 +104,13 @@ func TestApiShort(t *testing.T) {
 func CreateTestServer(t *testing.T) (*RestServer, func()) {
 	c, teardown := testutils.CreateTestMongoConnection(t)
 
-	api, err := NewShortApi(os.Getenv("SHORTSRV"))
+	api, err := shorter.NewShortApi(os.Getenv("SHORTSRV"))
 	if err != nil {
 		panic(err)
 	}
 	r := &mongo.Short{Coll: c}
 
-	s := NewShorter(r, api)
+	s := shorter.NewShorter(r, api)
 	restServer := &RestServer{ShortService: s}
 
 	return restServer, teardown

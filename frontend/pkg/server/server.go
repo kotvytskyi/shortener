@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"context"
@@ -10,25 +10,26 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/kotvytskyi/frontend/app/mongo"
+	"github.com/kotvytskyi/frontend/pkg/mongo"
+	"github.com/kotvytskyi/frontend/pkg/shorter"
 )
 
-type ErrorResponse struct {
+type errorResponse struct {
 	Error string `json:"error"`
 }
 
-type CreatedResponse struct {
+type createdResponse struct {
 	Url string
 }
 
-type ShortService interface {
+type shortService interface {
 	Short(ctx context.Context, urlToShort string, short string) (string, error)
 	CreateShortURL(r *http.Request, short string) string
 }
 
 type RestServer struct {
 	Port         int
-	ShortService ShortService
+	ShortService shortService
 }
 
 func NewRestServer(ctx context.Context) *RestServer {
@@ -37,7 +38,7 @@ func NewRestServer(ctx context.Context) *RestServer {
 
 	return &RestServer{
 		Port:         80,
-		ShortService: NewShorter(r, a),
+		ShortService: shorter.NewShorter(r, a),
 	}
 }
 
@@ -98,16 +99,16 @@ func (s *RestServer) shortProxyHandler(w http.ResponseWriter, r *http.Request) {
 
 func respondCreated(w http.ResponseWriter, url string) {
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(CreatedResponse{Url: url})
+	json.NewEncoder(w).Encode(createdResponse{Url: url})
 }
 
 func respondWithError(w http.ResponseWriter, status int, reason string) {
 	w.WriteHeader(status)
-	errResponse := &ErrorResponse{Error: reason}
+	errResponse := &errorResponse{Error: reason}
 	json.NewEncoder(w).Encode(errResponse)
 }
 
-func createRepository() UrlRepository {
+func createRepository() shorter.UrlRepository {
 	p := mongo.NewParams(os.Getenv("MONGO"), os.Getenv("MONGO_USER"), os.Getenv("MONGO_PASS"))
 	r, err := mongo.NewShort(p)
 	if err != nil {
@@ -117,8 +118,8 @@ func createRepository() UrlRepository {
 	return r
 }
 
-func createApi() ShortApi {
-	api, err := NewShortApi(os.Getenv("SHORTSRV"))
+func createApi() shorter.ShortApi {
+	api, err := shorter.NewShortApi(os.Getenv("SHORTSRV"))
 	if err != nil {
 		log.Fatalf("cannot create api: %v", err)
 	}

@@ -1,4 +1,4 @@
-package app
+package shorter
 
 import (
 	"context"
@@ -16,13 +16,13 @@ type ShortApi interface {
 
 type Shorter struct {
 	Repository UrlRepository
-	ShortApi   ShortApi
+	API        ShortApi
 }
 
 func NewShorter(r UrlRepository, a ShortApi) *Shorter {
 	s := &Shorter{}
 	s.Repository = r
-	s.ShortApi = a
+	s.API = a
 	return s
 }
 
@@ -31,7 +31,7 @@ func (s *Shorter) Short(ctx context.Context, from string, to string) (shortened 
 		ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 		defer cancel()
 
-		s, err := s.ShortApi.Get(ctx)
+		s, err := s.API.Get(ctx)
 		if err != nil {
 			return "", err
 		}

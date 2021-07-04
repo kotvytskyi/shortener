@@ -7,7 +7,7 @@ COPY go.sum .
 RUN go mod download
 
 COPY . .
-RUN CGO_ENABLED=0 go build -o ./out/frontend .
+RUN CGO_ENABLED=0 go build -o ./out/frontend ./cmd/frontend
 
 FROM alpine:latest
 COPY --from=builder /app/out/frontend /app/frontend
