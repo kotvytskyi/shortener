@@ -13,7 +13,7 @@ services:
             - MONGO_USER=root
             - MONGO_PASS=pass
         ports: 
-            - "8000:8080"
+            - "8081:8081"
     frontend:
         build: ./frontend
         environment:
@@ -21,7 +21,7 @@ services:
             - MONGO_USER=root
             - MONGO_PASS=pass
         ports:
-            - "8001:8080"
+            - "80:80"
 
     mongo:
         image: mongo

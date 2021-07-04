@@ -24,7 +24,7 @@ func main() {
 	}
 
 	httpServer := app.HttpServer{
-		Port:        8080,
+		Port:        8081,
 		DataService: serverMongo,
 	}
 

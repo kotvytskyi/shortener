@@ -66,7 +66,7 @@ func (s *HttpServer) reserveKeyHandler(rw http.ResponseWriter, h *http.Request) 
 	}
 
 	rw.WriteHeader(http.StatusOK)
-	json.NewEncoder(rw).Encode(struct{ Key string }{Key: string(key.Value)})
+	json.NewEncoder(rw).Encode(key)
 }
 
 type loggingResponseWriter struct {

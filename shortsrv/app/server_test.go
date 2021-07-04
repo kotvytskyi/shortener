@@ -28,7 +28,7 @@ func TestApiKeys(t *testing.T) {
 
 	key := &Key{}
 	json.NewDecoder(resp.Body).Decode(key)
-	assert.NotNil(t, key.Value)
+	assert.NotEmpty(t, key.Value)
 }
 
 type MockedDataService struct {
