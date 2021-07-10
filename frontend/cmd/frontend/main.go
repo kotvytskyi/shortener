@@ -12,7 +12,7 @@ func main() {
 	config := server.Config{
 		Mongo: server.MongoConfig{
 			Address:  os.Getenv("MONGO"),
-			User:     os.Getenv("MONGO_USR"),
+			User:     os.Getenv("MONGO_USER"),
 			Password: os.Getenv("MONGO_PASS"),
 		},
 		Short: server.ShortServerConfig{
