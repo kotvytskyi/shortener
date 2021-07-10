@@ -13,7 +13,7 @@ func TestReserveKey(t *testing.T) {
 		coll, teardown := testutils.CreateTestMongoConnection(t)
 		defer teardown()
 
-		mongo := &Mongo{coll}
+		mongo := &KeyRepository{coll}
 		_, err := mongo.ReserveKey(context.Background())
 		assert.NotNil(t, err)
 	})
@@ -22,7 +22,7 @@ func TestReserveKey(t *testing.T) {
 		coll, teardown := testutils.CreateTestMongoConnection(t)
 		defer teardown()
 
-		mongo := &Mongo{coll}
+		mongo := &KeyRepository{coll}
 		mongo.coll.InsertOne(context.Background(), &keyDto{Value: "test", Used: true})
 
 		_, err := mongo.ReserveKey(context.Background())
@@ -33,7 +33,7 @@ func TestReserveKey(t *testing.T) {
 		coll, teardown := testutils.CreateTestMongoConnection(t)
 		defer teardown()
 
-		mongo := &Mongo{coll}
+		mongo := &KeyRepository{coll}
 		key := &keyDto{Value: "test", Used: false}
 		mongo.coll.InsertOne(context.Background(), key)
 

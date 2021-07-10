@@ -39,7 +39,7 @@ func NewServer(config Config) (*HttpServer, error) {
 		Password: config.Mongo.Password,
 	}
 
-	serverMongo, err := mongo.NewMongo(mongoCfg)
+	serverMongo, err := mongo.NewKeyRepository(mongoCfg)
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,7 @@ type keyDto struct {
 	Used  bool   `json:"-" bson:"used"`
 }
 
-type Mongo struct {
+type KeyRepository struct {
 	coll *mongo.Collection
 }
 
@@ -25,7 +25,7 @@ type Config struct {
 	Password string
 }
 
-func NewMongo(config Config) (*Mongo, error) {
+func NewKeyRepository(config Config) (*KeyRepository, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
@@ -35,12 +35,12 @@ func NewMongo(config Config) (*Mongo, error) {
 		return nil, err
 	}
 
-	mongo := &Mongo{}
+	mongo := &KeyRepository{}
 	mongo.coll = client.Database("shortener").Collection("keys_pool")
 	return mongo, nil
 }
 
-func (m *Mongo) ReserveKey(ctx context.Context) (string, error) {
+func (m *KeyRepository) ReserveKey(ctx context.Context) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 	defer cancel()
 
