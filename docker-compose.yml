@@ -20,6 +20,7 @@ services:
             - MONGO=mongo
             - MONGO_USER=root
             - MONGO_PASS=pass
+            - SHORTSRV=shortsrv
         ports:
             - "80:80"
 
