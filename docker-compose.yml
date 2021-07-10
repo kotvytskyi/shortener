@@ -13,7 +13,7 @@ services:
             - MONGO_USER=root
             - MONGO_PASS=pass
         ports: 
-            - "8081:8081"
+            - "8081:80"
     frontend:
         build: ./frontend
         environment:
