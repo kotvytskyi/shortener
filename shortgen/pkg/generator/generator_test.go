@@ -1,4 +1,4 @@
-package app
+package generator
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func TestGenerateKey(t *testing.T) {
 
 	for _, test := range lengthTests {
 		t.Run(fmt.Sprintf("L=%d", test.len), func(t *testing.T) {
-			got := generate(test.len)
+			got := generateRandomString(test.len)
 			length := len(got)
 			if length != int(test.gotLen) {
 				t.Errorf("len of Generate(%d) = %d.", test.len, length)

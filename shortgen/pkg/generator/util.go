@@ -1,4 +1,4 @@
-package app
+package generator
 
 import (
 	"math/rand"
@@ -10,7 +10,7 @@ var alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 var numbers = "1234567890"
 var pool = strings.Split(alphabet+numbers, "")
 
-func generate(length uint) string {
+func generateRandomString(length uint) string {
 	s1 := rand.NewSource(time.Now().UnixNano())
 	r1 := rand.New(s1)
 

@@ -1,4 +1,4 @@
-package app
+package mongo
 
 import (
 	"context"
@@ -19,7 +19,7 @@ func TestCreate(t *testing.T) {
 	want := Key{
 		Value: "test_key",
 	}
-	err := mongo.create(context.Background(), want)
+	err := mongo.Create(context.Background(), want.Value)
 	assert.Nil(t, err)
 
 	got := Key{}
