@@ -1,4 +1,4 @@
-package app
+package server
 
 import (
 	"context"
@@ -9,12 +9,8 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/kotvytskyi/shortsrv/pkg/mongo"
 )
-
-type Key struct {
-	Value string `json:"val" bson:"val"`
-	Used  bool   `json:"-" bson:"used"`
-}
 
 type HttpServer struct {
 	Port        int
@@ -22,7 +18,38 @@ type HttpServer struct {
 }
 
 type DataService interface {
-	ReserveKey(ctx context.Context) (*Key, error)
+	ReserveKey(ctx context.Context) (string, error)
+}
+
+type MongoConfig struct {
+	Address  string
+	User     string
+	Password string
+}
+
+type Config struct {
+	Mongo MongoConfig
+	Port  int
+}
+
+func NewServer(config Config) (*HttpServer, error) {
+	mongoCfg := mongo.Config{
+		Address:  config.Mongo.Address,
+		User:     config.Mongo.User,
+		Password: config.Mongo.Password,
+	}
+
+	serverMongo, err := mongo.NewMongo(mongoCfg)
+	if err != nil {
+		return nil, err
+	}
+
+	srv := &HttpServer{
+		Port:        config.Port,
+		DataService: serverMongo,
+	}
+
+	return srv, nil
 }
 
 func (s *HttpServer) Run(ctx context.Context) error {

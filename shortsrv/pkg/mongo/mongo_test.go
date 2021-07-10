@@ -1,4 +1,4 @@
-package app
+package mongo
 
 import (
 	"context"
@@ -23,22 +23,22 @@ func TestReserveKey(t *testing.T) {
 		defer teardown()
 
 		mongo := &Mongo{coll}
-		mongo.coll.InsertOne(context.Background(), &Key{Value: "test", Used: true})
+		mongo.coll.InsertOne(context.Background(), &keyDto{Value: "test", Used: true})
 
 		_, err := mongo.ReserveKey(context.Background())
 		assert.NotNil(t, err)
 	})
 
-	t.Run("returns err when no unused keys in pool", func(t *testing.T) {
+	t.Run("returns a key", func(t *testing.T) {
 		coll, teardown := testutils.CreateTestMongoConnection(t)
 		defer teardown()
 
 		mongo := &Mongo{coll}
-		key := &Key{Value: "test", Used: false}
+		key := &keyDto{Value: "test", Used: false}
 		mongo.coll.InsertOne(context.Background(), key)
 
 		reserved, err := mongo.ReserveKey(context.Background())
 		assert.Nil(t, err)
-		assert.Equal(t, key, reserved)
+		assert.Equal(t, key.Value, reserved)
 	})
 }

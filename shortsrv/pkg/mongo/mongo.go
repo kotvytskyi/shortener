@@ -1,7 +1,8 @@
-package app
+package mongo
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -9,19 +10,27 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type keyDto struct {
+	Value string `json:"val" bson:"val"`
+	Used  bool   `json:"-" bson:"used"`
+}
+
 type Mongo struct {
 	coll *mongo.Collection
 }
 
-type MongoConfig struct {
-	Endpoint string
+type Config struct {
+	Address  string
+	User     string
+	Password string
 }
 
-func NewMongo(config MongoConfig) (*Mongo, error) {
+func NewMongo(config Config) (*Mongo, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(config.Endpoint))
+	endpoint := fmt.Sprintf("mongodb://%s:%s@%s:27017", config.User, config.Password, config.Address)
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(endpoint))
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +40,7 @@ func NewMongo(config MongoConfig) (*Mongo, error) {
 	return mongo, nil
 }
 
-func (m *Mongo) ReserveKey(ctx context.Context) (*Key, error) {
+func (m *Mongo) ReserveKey(ctx context.Context) (string, error) {
 	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
 	defer cancel()
 
@@ -46,10 +55,10 @@ func (m *Mongo) ReserveKey(ctx context.Context) (*Key, error) {
 
 	key := keys.FindOneAndUpdate(ctx, filter, update)
 	if key.Err() != nil {
-		return nil, key.Err()
+		return "", key.Err()
 	}
 
-	result := &Key{}
+	result := &keyDto{}
 	key.Decode(&result)
-	return result, nil
+	return result.Value, nil
 }
