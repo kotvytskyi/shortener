@@ -19,7 +19,7 @@ func main() {
 			User:     os.Getenv("MONGO_USER"),
 			Password: os.Getenv("MONGO_PASS"),
 		},
-		Port: 8081,
+		Port: 80,
 	}
 
 	httpServer, err := server.NewServer(config)

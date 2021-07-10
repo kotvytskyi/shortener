@@ -78,6 +78,7 @@ func (s *RestServer) Run(ctx context.Context) error {
 
 func (s *RestServer) router() *mux.Router {
 	r := mux.NewRouter()
+	r.Use(loggingMiddleware)
 
 	r.HandleFunc("/api/shorts", s.createShortHandler).Methods("POST")
 	r.HandleFunc("/short/{short}", s.shortProxyHandler).Methods("GET")
@@ -99,7 +100,7 @@ func (s *RestServer) createShortHandler(w http.ResponseWriter, r *http.Request) 
 
 	short, err := s.ShortService.Short(context.Background(), req.URL, req.Short)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "oops! an error occurred. please, try again later or contact the support")
+		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("try again later or contact the support, %v", err))
 		return
 	}
 
@@ -139,4 +140,25 @@ func createApi(config ShortServerConfig) shorter.ShortApi {
 	}
 
 	return api
+}
+
+type loggingResponseWriter struct {
+	http.ResponseWriter
+	statusCode int
+}
+
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
+func loggingMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		log.Printf("[%s] %s", r.Method, r.URL.Path)
+
+		lrw := &loggingResponseWriter{rw, http.StatusOK}
+		next.ServeHTTP(lrw, r)
+
+		log.Printf("[%s] %s - %d", r.Method, r.URL.Path, lrw.statusCode)
+	})
 }

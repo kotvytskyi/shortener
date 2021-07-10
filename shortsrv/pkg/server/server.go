@@ -101,6 +101,11 @@ type loggingResponseWriter struct {
 	statusCode int
 }
 
+func (lrw *loggingResponseWriter) WriteHeader(code int) {
+	lrw.statusCode = code
+	lrw.ResponseWriter.WriteHeader(code)
+}
+
 func NewLoggingResponseWriter(rw http.ResponseWriter) *loggingResponseWriter {
 	return &loggingResponseWriter{rw, http.StatusOK}
 }
