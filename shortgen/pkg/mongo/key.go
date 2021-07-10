@@ -13,7 +13,7 @@ type Key struct {
 	Value string `json:"val" bson:"val"`
 }
 
-type Mongo struct {
+type KeyRepository struct {
 	coll *mongo.Collection
 }
 
@@ -23,7 +23,7 @@ type Config struct {
 	Address  string
 }
 
-func NewKeyRepository(config Config) (*Mongo, error) {
+func NewKeyRepository(config Config) (*KeyRepository, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
@@ -33,12 +33,12 @@ func NewKeyRepository(config Config) (*Mongo, error) {
 		return nil, err
 	}
 
-	mongo := &Mongo{}
+	mongo := &KeyRepository{}
 	mongo.coll = client.Database("shortener").Collection("keys_pool")
 	return mongo, nil
 }
 
-func (r *Mongo) Create(ctx context.Context, key string) error {
+func (r *KeyRepository) Create(ctx context.Context, key string) error {
 	timeoutCtx, cancel := context.WithTimeout(ctx, time.Second*2)
 	defer cancel()
 

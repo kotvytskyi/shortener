@@ -12,7 +12,7 @@ func TestCreate(t *testing.T) {
 	coll, teardown := testutils.CreateTestMongoConnection(t)
 	defer teardown()
 
-	mongo := &Mongo{
+	mongo := &KeyRepository{
 		coll: coll,
 	}
 
