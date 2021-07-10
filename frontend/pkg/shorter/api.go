@@ -3,8 +3,8 @@ package shorter
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 )
@@ -37,11 +37,10 @@ func (c *AppShortApi) Get(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	key := &Key{}
-	err = json.NewDecoder(resp.Body).Decode(key)
+	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
 	}
 
-	return key.Value, nil
+	return string(bodyBytes), nil
 }
