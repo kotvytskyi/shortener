@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -32,9 +31,24 @@ type RestServer struct {
 	ShortService shortService
 }
 
-func NewRestServer(ctx context.Context) *RestServer {
-	r := createRepository()
-	a := createApi()
+type MongoConfig struct {
+	User     string
+	Password string
+	Address  string
+}
+
+type ShortServerConfig struct {
+	Address string
+}
+
+type Config struct {
+	Mongo MongoConfig
+	Short ShortServerConfig
+}
+
+func NewRestServer(ctx context.Context, config Config) *RestServer {
+	r := createRepository(config.Mongo)
+	a := createApi(config.Short)
 
 	return &RestServer{
 		Port:         80,
@@ -108,8 +122,8 @@ func respondWithError(w http.ResponseWriter, status int, reason string) {
 	json.NewEncoder(w).Encode(errResponse)
 }
 
-func createRepository() shorter.UrlRepository {
-	p := mongo.NewParams(os.Getenv("MONGO"), os.Getenv("MONGO_USER"), os.Getenv("MONGO_PASS"))
+func createRepository(config MongoConfig) shorter.UrlRepository {
+	p := mongo.NewParams(config.Address, config.User, config.Password)
 	r, err := mongo.NewShort(p)
 	if err != nil {
 		log.Fatalf("cannot create repository: %v", err)
@@ -118,8 +132,8 @@ func createRepository() shorter.UrlRepository {
 	return r
 }
 
-func createApi() shorter.ShortApi {
-	api, err := shorter.NewShortApi(os.Getenv("SHORTSRV"))
+func createApi(config ShortServerConfig) shorter.ShortApi {
+	api, err := shorter.NewShortApi(config.Address)
 	if err != nil {
 		log.Fatalf("cannot create api: %v", err)
 	}
