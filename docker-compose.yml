@@ -3,26 +3,26 @@ services:
     shortgen:
         build: ./shortgen
         environment:
-            - MONGO=mongo
+            - MONGO=${MONGO:-mongo}
             - MONGO_USER=${MONGO_USER}
             - MONGO_PASS=${MONGO_PASS}
     shortsrv:
         build: ./shortsrv
         environment:
-            - MONGO=mongo
+            - MONGO=${MONGO:-mongo}
             - MONGO_USER=${MONGO_USER}
             - MONGO_PASS=${MONGO_PASS}
         ports: 
-            - "8081:80"
+            - "80:80"
     frontend:
         build: ./frontend
         environment:
-            - MONGO=mongo
+            - MONGO=${MONGO:-mongo}
+            - SHORTSRV=${SHORTSRV:-shortsrv}
             - MONGO_USER=${MONGO_USER}
             - MONGO_PASS=${MONGO_PASS}
-            - SHORTSRV=${SHORTSRV:-shortsrv}
         ports:
-            - "80:80"
+            - "8081:80"
 
     mongo:
         image: mongo
