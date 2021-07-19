@@ -12,6 +12,10 @@ import (
 	"github.com/kotvytskyi/shortsrv/pkg/mongo"
 )
 
+type KeyCreatedResponse struct {
+	Key string `json:"key"`
+}
+
 type HttpServer struct {
 	Port        int
 	DataService DataService
@@ -93,7 +97,7 @@ func (s *HttpServer) reserveKeyHandler(rw http.ResponseWriter, h *http.Request) 
 	}
 
 	rw.WriteHeader(http.StatusOK)
-	json.NewEncoder(rw).Encode(key)
+	json.NewEncoder(rw).Encode(&KeyCreatedResponse{Key: key})
 }
 
 type loggingResponseWriter struct {

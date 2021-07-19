@@ -3,14 +3,14 @@ package shorter
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 )
 
-type Key struct {
-	Value string `json:"val"`
+type apiResponse struct {
+	Key string `json:"key"`
 }
 
 type AppShortApi struct {
@@ -41,10 +41,11 @@ func (c *AppShortApi) Get(ctx context.Context) (string, error) {
 		return "", errors.New("cannot obtain a new short")
 	}
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	key := &apiResponse{}
+	err = json.NewDecoder(resp.Body).Decode(key)
 	if err != nil {
 		return "", err
 	}
 
-	return string(bodyBytes), nil
+	return key.Key, nil
 }
