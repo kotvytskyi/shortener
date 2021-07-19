@@ -2,6 +2,7 @@ package shorter
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -44,6 +45,5 @@ func (s *Shorter) Short(ctx context.Context, from string, to string) (shortened 
 }
 
 func (s *Shorter) CreateShortURL(r *http.Request, short string) string {
-	// solve tests https issues
-	return "http://" + r.Host + "/short/" + short
+	return fmt.Sprintf("http://%s/short/%s", r.Host, short)
 }

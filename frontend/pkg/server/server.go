@@ -100,7 +100,7 @@ func (s *RestServer) createShortHandler(w http.ResponseWriter, r *http.Request) 
 
 	short, err := s.ShortService.Short(context.Background(), req.URL, req.Short)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("try again later or contact the support, %v", err))
+		respondWithError(w, http.StatusInternalServerError, fmt.Sprintf("Error: , %v", err))
 		return
 	}
 

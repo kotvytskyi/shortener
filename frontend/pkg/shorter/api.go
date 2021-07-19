@@ -37,6 +37,10 @@ func (c *AppShortApi) Get(ctx context.Context) (string, error) {
 		return "", err
 	}
 
+	if resp.StatusCode != 200 {
+		return "", errors.New("cannot obtain a new short")
+	}
+
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
