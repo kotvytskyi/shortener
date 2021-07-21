@@ -9,8 +9,10 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kotvytskyi/frontend/pkg/config"
+	"github.com/kotvytskyi/frontend/pkg/mongo"
 	"github.com/kotvytskyi/frontend/pkg/server/controller"
 	"github.com/kotvytskyi/frontend/pkg/server/middleware"
+	"github.com/kotvytskyi/frontend/pkg/shorter"
 )
 
 type RestServer struct {
@@ -19,14 +21,9 @@ type RestServer struct {
 }
 
 func NewRestServer(ctx context.Context, mongoCfg config.MongoConfig, shortCfg config.ShortServerConfig) *RestServer {
-	controller, err := controller.NewShort(mongoCfg, shortCfg)
-	if err != nil {
-		panic(fmt.Sprintf("Cannot create the server. Error: %v", err))
-	}
-
 	return &RestServer{
 		port:       80,
-		controller: controller,
+		controller: createShortController(mongoCfg, shortCfg),
 	}
 }
 
@@ -62,4 +59,20 @@ func (s *RestServer) router() *mux.Router {
 
 func (s *RestServer) shortProxyHandler(w http.ResponseWriter, r *http.Request) {
 
+}
+
+func createShortController(mongoCfg config.MongoConfig, shortCfg config.ShortServerConfig) *controller.Short {
+	api, err := shorter.NewShortApi(shortCfg)
+	if err != nil {
+		panic(fmt.Sprintf("Cannot initialize the short api. %v", err))
+	}
+
+	mongo, err := mongo.NewShort(mongoCfg)
+	if err != nil {
+		panic(fmt.Sprintf("Cannot initialize the mongo. %v", err))
+	}
+
+	service := shorter.NewShorter(mongo, api)
+
+	return controller.NewShort(service)
 }

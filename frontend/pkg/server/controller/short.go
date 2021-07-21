@@ -7,30 +7,21 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-
-	"github.com/kotvytskyi/frontend/pkg/config"
-	"github.com/kotvytskyi/frontend/pkg/mongo"
-	"github.com/kotvytskyi/frontend/pkg/shorter"
 )
 
-type Short struct {
-	ShortService shortService
+type ShortService interface {
+	Short(ctx context.Context, urlToShort string, short string) (string, error)
+	CreateShortURL(r *http.Request, short string) string
 }
 
-func NewShort(mongoCfg config.MongoConfig, shortCfg config.ShortServerConfig) (*Short, error) {
-	repository, err := mongo.NewShort(mongoCfg)
-	if err != nil {
-		return nil, err
-	}
+type Short struct {
+	ShortService ShortService
+}
 
-	api, err := shorter.NewShortApi(shortCfg)
-	if err != nil {
-		return nil, err
-	}
-
+func NewShort(service ShortService) *Short {
 	return &Short{
-		ShortService: shorter.NewShorter(repository, api),
-	}, nil
+		ShortService: service,
+	}
 }
 
 type CreateShortRequest struct {
@@ -71,9 +62,4 @@ func (s *Short) CreateShort(w http.ResponseWriter, r *http.Request) {
 
 	sURL := s.ShortService.CreateShortURL(r, short)
 	respondCreated(w, sURL)
-}
-
-type shortService interface {
-	Short(ctx context.Context, urlToShort string, short string) (string, error)
-	CreateShortURL(r *http.Request, short string) string
 }
