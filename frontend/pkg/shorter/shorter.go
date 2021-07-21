@@ -9,6 +9,7 @@ import (
 
 type UrlRepository interface {
 	Create(ctx context.Context, url string, short string) error
+	GetUrl(ctx context.Context, short string) (string, error)
 }
 
 type ShortApi interface {
@@ -21,10 +22,7 @@ type Shorter struct {
 }
 
 func NewShorter(r UrlRepository, a ShortApi) *Shorter {
-	s := &Shorter{}
-	s.Repository = r
-	s.API = a
-	return s
+	return &Shorter{Repository: r, API: a}
 }
 
 func (s *Shorter) Short(ctx context.Context, from string, to string) (shortened string, err error) {
@@ -42,6 +40,10 @@ func (s *Shorter) Short(ctx context.Context, from string, to string) (shortened 
 
 	err = s.Repository.Create(ctx, from, to)
 	return to, err
+}
+
+func (s *Shorter) GetUrl(ctx context.Context, short string) (url string, err error) {
+	return s.Repository.GetUrl(ctx, short)
 }
 
 func (s *Shorter) CreateShortURL(r *http.Request, short string) string {

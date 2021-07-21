@@ -81,9 +81,7 @@ func CreateTestServer(t *testing.T, mockedShort string) (*RestServer, func()) {
 
 	s := shorter.NewShorter(r, api)
 
-	controller := &controller.Short{
-		ShortService: s,
-	}
+	controller := controller.NewShort(s)
 	restServer := &RestServer{controller: controller}
 
 	return restServer, teardown

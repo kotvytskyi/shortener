@@ -22,7 +22,7 @@ type RestServer struct {
 
 func NewRestServer(ctx context.Context, mongoCfg config.MongoConfig, shortCfg config.ShortServerConfig) *RestServer {
 	return &RestServer{
-		port:       80,
+		port:       8081,
 		controller: createShortController(mongoCfg, shortCfg),
 	}
 }
@@ -52,13 +52,9 @@ func (s *RestServer) router() *mux.Router {
 	r.Use(middleware.LoggingMiddleware)
 
 	r.HandleFunc("/api/shorts", s.controller.CreateShort).Methods("POST")
-	r.HandleFunc("/short/{short}", s.shortProxyHandler).Methods("GET")
+	r.HandleFunc("/short/{short}", s.controller.ProxyShort).Methods("GET")
 
 	return r
-}
-
-func (s *RestServer) shortProxyHandler(w http.ResponseWriter, r *http.Request) {
-
 }
 
 func createShortController(mongoCfg config.MongoConfig, shortCfg config.ShortServerConfig) *controller.Short {

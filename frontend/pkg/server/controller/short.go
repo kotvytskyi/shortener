@@ -5,22 +5,26 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+
+	"github.com/gorilla/mux"
 )
 
 type ShortService interface {
 	Short(ctx context.Context, urlToShort string, short string) (string, error)
+	GetUrl(ctx context.Context, short string) (string, error)
 	CreateShortURL(r *http.Request, short string) string
 }
 
 type Short struct {
-	ShortService ShortService
+	service ShortService
 }
 
 func NewShort(service ShortService) *Short {
 	return &Short{
-		ShortService: service,
+		service: service,
 	}
 }
 
@@ -43,7 +47,7 @@ func (r *CreateShortRequest) Validate() error {
 }
 
 func (s *Short) CreateShort(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json") // move to middleware
+	w.Header().Add("Content-Type", "application/json")
 
 	req := &CreateShortRequest{}
 	json.NewDecoder(r.Body).Decode(req)
@@ -54,12 +58,29 @@ func (s *Short) CreateShort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	short, err := s.ShortService.Short(context.Background(), req.URL, req.Short)
+	short, err := s.service.Short(context.Background(), req.URL, req.Short)
 	if err != nil {
 		respondError(w, http.StatusInternalServerError, fmt.Sprintf("Error: , %v", err))
 		return
 	}
 
-	sURL := s.ShortService.CreateShortURL(r, short)
+	sURL := s.service.CreateShortURL(r, short)
 	respondCreated(w, sURL)
+}
+
+func (s *Short) ProxyShort(w http.ResponseWriter, r *http.Request) {
+	short := mux.Vars(r)["short"]
+	if short == "" {
+		respondError(w, http.StatusNotFound, "short is empty")
+		return
+	}
+
+	url, err := s.service.GetUrl(context.Background(), short)
+	if err != nil {
+		log.Print(fmt.Sprintf("ERROR: %v", err))
+		respondError(w, http.StatusInternalServerError, "")
+		return
+	}
+
+	http.Redirect(w, r, url, http.StatusTemporaryRedirect)
 }

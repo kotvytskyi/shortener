@@ -2,9 +2,11 @@ package mongo
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/kotvytskyi/frontend/pkg/config"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -31,6 +33,20 @@ func NewShort(cfg config.MongoConfig) (*Short, error) {
 	coll := client.Database("shortener").Collection("shorts")
 
 	return &Short{coll}, nil
+}
+
+func (r *Short) GetUrl(ctx context.Context, short string) (string, error) {
+	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
+	defer cancel()
+
+	var dto shortUrlDto
+	err := r.Coll.FindOne(ctx, bson.M{"short": short}).Decode(&dto)
+
+	if err != nil && err == mongo.ErrNoDocuments {
+		return "", errors.New("no url found for the given short")
+	}
+
+	return dto.Url, nil
 }
 
 func (r *Short) Create(ctx context.Context, url string, short string) error {

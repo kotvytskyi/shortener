@@ -24,3 +24,16 @@ func TestCreate(t *testing.T) {
 	assert.Equal(t, "test_url", dto.Url)
 	assert.Equal(t, "test_short", dto.Short)
 }
+
+func TestGetUrl(t *testing.T) {
+	coll, teardown := testutils.CreateTestMongoConnection(t)
+	defer teardown()
+
+	coll.InsertOne(context.Background(), shortUrlDto{Url: "test", Short: "t"})
+
+	repo := Short{coll}
+	got, err := repo.GetUrl(context.Background(), "t")
+	assert.Nil(t, err)
+
+	assert.Equal(t, "test", got)
+}
