@@ -11,6 +11,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/kotvytskyi/frontend/pkg/mongo"
+	"github.com/kotvytskyi/frontend/pkg/server/controller"
 	"github.com/kotvytskyi/frontend/pkg/shorter"
 	"github.com/kotvytskyi/shortener/testutils"
 	"github.com/stretchr/testify/assert"
@@ -42,7 +43,7 @@ func TestApiShort(t *testing.T) {
 			srv := httptest.NewServer(server.router())
 			defer srv.Close()
 
-			request := CreateShortRequest{
+			request := controller.CreateShortRequest{
 				URL:   test.url,
 				Short: test.short,
 			}
@@ -53,13 +54,13 @@ func TestApiShort(t *testing.T) {
 			assert.Equal(t, test.status, resp.StatusCode)
 
 			if resp.StatusCode >= 400 {
-				eResp := &errorResponse{}
+				eResp := &controller.ErrorResponse{}
 				json.NewDecoder(resp.Body).Decode(eResp)
 				assert.Equal(t, eResp.Error, test.response)
 				return
 			}
 
-			r := &createdResponse{}
+			r := &controller.CreatedResponse{}
 			json.NewDecoder(resp.Body).Decode(r)
 
 			u, err := url.Parse(r.Url)
@@ -79,7 +80,11 @@ func CreateTestServer(t *testing.T, mockedShort string) (*RestServer, func()) {
 	r := &mongo.Short{Coll: c}
 
 	s := shorter.NewShorter(r, api)
-	restServer := &RestServer{ShortService: s}
+
+	controller := &controller.Short{
+		ShortService: s,
+	}
+	restServer := &RestServer{controller: controller}
 
 	return restServer, teardown
 }

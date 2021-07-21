@@ -7,6 +7,8 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+
+	"github.com/kotvytskyi/frontend/pkg/config"
 )
 
 type apiResponse struct {
@@ -17,8 +19,8 @@ type AppShortApi struct {
 	base *url.URL
 }
 
-func NewShortApi(baseUrl string) (*AppShortApi, error) {
-	addr, err := url.Parse(baseUrl)
+func NewShortApi(cfg config.ShortServerConfig) (*AppShortApi, error) {
+	addr, err := url.Parse(cfg.Address)
 	if err != nil {
 		return nil, errors.New("SHORTSRV is not a valid address")
 	}

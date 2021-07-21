@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/kotvytskyi/frontend/pkg/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -17,10 +18,11 @@ type shortUrlDto struct {
 	Short string `bson:"short"`
 }
 
-func NewShort(p Params) (*Short, error) {
+func NewShort(cfg config.MongoConfig) (*Short, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 	defer cancel()
 
+	p := NewParams(cfg)
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(p.Endpoint))
 	if err != nil {
 		return nil, err
