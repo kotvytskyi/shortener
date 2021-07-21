@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kotvytskyi/frontend/pkg/mongo"
+	"github.com/kotvytskyi/frontend/pkg/server/middleware"
 	"github.com/kotvytskyi/frontend/pkg/shorter"
 )
 
@@ -78,7 +79,7 @@ func (s *RestServer) Run(ctx context.Context) error {
 
 func (s *RestServer) router() *mux.Router {
 	r := mux.NewRouter()
-	r.Use(loggingMiddleware)
+	r.Use(middleware.LoggingMiddleware)
 
 	r.HandleFunc("/api/shorts", s.createShortHandler).Methods("POST")
 	r.HandleFunc("/short/{short}", s.shortProxyHandler).Methods("GET")
@@ -140,25 +141,4 @@ func createApi(config ShortServerConfig) shorter.ShortApi {
 	}
 
 	return api
-}
-
-type loggingResponseWriter struct {
-	http.ResponseWriter
-	statusCode int
-}
-
-func (lrw *loggingResponseWriter) WriteHeader(code int) {
-	lrw.statusCode = code
-	lrw.ResponseWriter.WriteHeader(code)
-}
-
-func loggingMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		log.Printf("[%s] %s", r.Method, r.URL.Path)
-
-		lrw := &loggingResponseWriter{rw, http.StatusOK}
-		next.ServeHTTP(lrw, r)
-
-		log.Printf("[%s] %s - %d", r.Method, r.URL.Path, lrw.statusCode)
-	})
 }
