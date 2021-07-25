@@ -13,8 +13,8 @@ import (
 	"github.com/kotvytskyi/frontend/pkg/mongo"
 	"github.com/kotvytskyi/frontend/pkg/server/controller"
 	"github.com/kotvytskyi/frontend/pkg/shorter"
-	"github.com/kotvytskyi/shortener/testutils"
-	"github.com/stretchr/testify/assert"
+	"github.com/kotvytskyi/testmongo"
+	"github.com/stretchr/testify/require"
 )
 
 func TestApiShort(t *testing.T) {
@@ -50,13 +50,13 @@ func TestApiShort(t *testing.T) {
 			rBytes, _ := json.Marshal(request)
 
 			resp, err := http.Post(srv.URL+"/api/shorts", "application/json", bytes.NewBuffer(rBytes))
-			assert.Nil(t, err)
-			assert.Equal(t, test.status, resp.StatusCode)
+			require.Nil(t, err)
+			require.Equal(t, test.status, resp.StatusCode)
 
 			if resp.StatusCode >= 400 {
 				eResp := &controller.ErrorResponse{}
 				json.NewDecoder(resp.Body).Decode(eResp)
-				assert.Equal(t, eResp.Error, test.response)
+				require.Equal(t, eResp.Error, test.response)
 				return
 			}
 
@@ -64,9 +64,9 @@ func TestApiShort(t *testing.T) {
 			json.NewDecoder(resp.Body).Decode(r)
 
 			u, err := url.Parse(r.Url)
-			assert.Nil(t, err)
+			require.Nil(t, err)
 
-			assert.Equal(t, test.response, u.Path)
+			require.Equal(t, test.response, u.Path)
 		})
 	}
 }
@@ -74,7 +74,7 @@ func TestApiShort(t *testing.T) {
 func CreateTestServer(t *testing.T, mockedShort string) (*RestServer, func()) {
 	t.Helper()
 
-	c, teardown := testutils.CreateTestMongoConnection(t)
+	c, teardown := testmongo.CreateTestMongoConnection(t)
 
 	api := &MockedApi{mockedShort: mockedShort}
 	r := &mongo.Short{Coll: c}
