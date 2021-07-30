@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.16
+        
+    - name: Start containers
+      run: docker-compose up -d
+
+    - name: build frontend
+      run: cd ./frontend && go build ./...
+    
+    - name: test frontend
+      run: cd ./frontend && go test ./...
+
+    - name: build shortgen
+      run: cd ./shortgen && go build ./...
+    
+    - name: test shortgen
+      run: cd ./shortgen && go test ./...
+
+    - name: build shortsrv
+      run: cd ./shortsrv && go build ./...
+    
+    - name: test shortsrv
+      run: cd ./shortsrv && go test ./...
+
+    - name: Stop containers
+      run: docker-compose down
