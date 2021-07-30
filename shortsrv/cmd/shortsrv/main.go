@@ -6,13 +6,10 @@ import (
 	"log"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/kotvytskyi/shortsrv/pkg/server"
 )
 
 func main() {
-	godotenv.Load()
-
 	config := server.Config{
 		Mongo: server.MongoConfig{
 			Address:  os.Getenv("MONGO"),
