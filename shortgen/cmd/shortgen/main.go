@@ -4,13 +4,10 @@ import (
 	"context"
 	"os"
 
-	"github.com/joho/godotenv"
 	"github.com/kotvytskyi/shortgen/pkg/scheduler"
 )
 
 func main() {
-	godotenv.Load()
-
 	cfg := scheduler.Config{
 		Mongo: scheduler.MongoConfig{
 			Address:  os.Getenv("MONGO"),
