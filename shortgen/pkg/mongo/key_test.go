@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kotvytskyi/shortener/testutils"
+	"github.com/kotvytskyi/testmongo"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreate(t *testing.T) {
-	coll, teardown := testutils.CreateTestMongoConnection(t)
+	coll, teardown := testmongo.CreateTestMongoConnection(t)
 	defer teardown()
 
 	mongo := &KeyRepository{
