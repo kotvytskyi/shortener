@@ -51,6 +51,8 @@ github.com/kotvytskyi/shortener v0.0.0-20210721193026-101348935321 h1:jW8nvnz2Bo
 github.com/kotvytskyi/shortener v0.0.0-20210721193026-101348935321/go.mod h1:g9U5GvfxLx0cqhDYK7Ud4pNjoR9TEa1b0fumJc/Z12Y=
 github.com/kotvytskyi/testmongo v0.0.0-20210725164640-e0c076cd0330 h1:HT9Ax35VXXKfSHcoUvK+psVj3XC1s+TAsG5SzQk94r4=
 github.com/kotvytskyi/testmongo v0.0.0-20210725164640-e0c076cd0330/go.mod h1:aM3cjO57qSoAsSd3F13xK7GtSqzISEZg3Ti/PwzmaK0=
+github.com/kotvytskyi/testmongo v0.0.0-20210730180522-e96d2f7fb037 h1:qeYdQh7IfSR4O66omUGtVFx7UOv3NBCixnb9CiKkFAM=
+github.com/kotvytskyi/testmongo v0.0.0-20210730180522-e96d2f7fb037/go.mod h1:aM3cjO57qSoAsSd3F13xK7GtSqzISEZg3Ti/PwzmaK0=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
 github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
