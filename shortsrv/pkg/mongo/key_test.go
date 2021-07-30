@@ -4,13 +4,13 @@ import (
 	"context"
 	"testing"
 
-	"github.com/kotvytskyi/shortener/testutils"
+	"github.com/kotvytskyi/testmongo"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestReserveKey(t *testing.T) {
 	t.Run("returns err when no keys in pool", func(t *testing.T) {
-		coll, teardown := testutils.CreateTestMongoConnection(t)
+		coll, teardown := testmongo.CreateTestMongoConnection(t)
 		defer teardown()
 
 		mongo := &KeyRepository{coll}
@@ -19,7 +19,7 @@ func TestReserveKey(t *testing.T) {
 	})
 
 	t.Run("returns err when no unused keys in pool", func(t *testing.T) {
-		coll, teardown := testutils.CreateTestMongoConnection(t)
+		coll, teardown := testmongo.CreateTestMongoConnection(t)
 		defer teardown()
 
 		mongo := &KeyRepository{coll}
@@ -30,7 +30,7 @@ func TestReserveKey(t *testing.T) {
 	})
 
 	t.Run("returns a key", func(t *testing.T) {
-		coll, teardown := testutils.CreateTestMongoConnection(t)
+		coll, teardown := testmongo.CreateTestMongoConnection(t)
 		defer teardown()
 
 		mongo := &KeyRepository{coll}
