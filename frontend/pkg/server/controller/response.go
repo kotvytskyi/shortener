@@ -10,16 +10,18 @@ type ErrorResponse struct {
 }
 
 type CreatedResponse struct {
-	Url string
+	URL string
 }
 
 func respondCreated(w http.ResponseWriter, url string) {
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(CreatedResponse{Url: url})
+	_ = json.NewEncoder(w).Encode(CreatedResponse{URL: url})
 }
 
 func respondError(w http.ResponseWriter, status int, reason string) {
 	w.WriteHeader(status)
+
 	errResponse := &ErrorResponse{Error: reason}
-	json.NewEncoder(w).Encode(errResponse)
+
+	_ = json.NewEncoder(w).Encode(errResponse)
 }

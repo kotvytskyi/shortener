@@ -63,7 +63,7 @@ func TestApiShort(t *testing.T) {
 			r := &controller.CreatedResponse{}
 			json.NewDecoder(resp.Body).Decode(r)
 
-			u, err := url.Parse(r.Url)
+			u, err := url.Parse(r.URL)
 			require.Nil(t, err)
 
 			require.Equal(t, test.response, u.Path)

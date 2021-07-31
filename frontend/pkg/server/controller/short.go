@@ -14,7 +14,7 @@ import (
 
 type ShortService interface {
 	Short(ctx context.Context, urlToShort string, short string) (string, error)
-	GetUrl(ctx context.Context, short string) (string, error)
+	GetURL(ctx context.Context, short string) (string, error)
 	CreateShortURL(r *http.Request, short string) string
 }
 
@@ -50,9 +50,14 @@ func (s *Short) CreateShort(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 
 	req := &CreateShortRequest{}
-	json.NewDecoder(r.Body).Decode(req)
 
-	err := req.Validate()
+	err := json.NewDecoder(r.Body).Decode(req)
+	if err != nil {
+		respondError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	err = req.Validate()
 	if err != nil {
 		respondError(w, http.StatusBadRequest, err.Error())
 		return
@@ -75,10 +80,11 @@ func (s *Short) ProxyShort(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	url, err := s.service.GetUrl(context.Background(), short)
+	url, err := s.service.GetURL(context.Background(), short)
 	if err != nil {
 		log.Print(fmt.Sprintf("ERROR: %v", err))
 		respondError(w, http.StatusInternalServerError, "")
+
 		return
 	}
 

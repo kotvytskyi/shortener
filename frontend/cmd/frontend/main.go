@@ -21,6 +21,7 @@ func main() {
 	}
 
 	srv := server.NewRestServer(context.Background(), mongoCfg, shortCgf)
+
 	err := srv.Run(context.Background())
 	if err != nil {
 		log.Fatalf("An error occurred in http server: %v", err)
