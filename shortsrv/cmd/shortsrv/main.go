@@ -9,6 +9,8 @@ import (
 	"github.com/kotvytskyi/shortsrv/pkg/server"
 )
 
+const PORT = 80
+
 func main() {
 	config := server.Config{
 		Mongo: server.MongoConfig{
@@ -16,7 +18,7 @@ func main() {
 			User:     os.Getenv("MONGO_USER"),
 			Password: os.Getenv("MONGO_PASS"),
 		},
-		Port: 80,
+		Port: PORT,
 	}
 
 	httpServer, err := server.NewServer(config)

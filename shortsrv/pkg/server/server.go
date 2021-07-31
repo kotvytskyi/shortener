@@ -16,7 +16,7 @@ type KeyCreatedResponse struct {
 	Key string `json:"key"`
 }
 
-type HttpServer struct {
+type HTTPServer struct {
 	Port        int
 	DataService DataService
 }
@@ -36,7 +36,7 @@ type Config struct {
 	Port  int
 }
 
-func NewServer(config Config) (*HttpServer, error) {
+func NewServer(config Config) (*HTTPServer, error) {
 	mongoCfg := mongo.Config{
 		Address:  config.Mongo.Address,
 		User:     config.Mongo.User,
@@ -48,7 +48,7 @@ func NewServer(config Config) (*HttpServer, error) {
 		return nil, err
 	}
 
-	srv := &HttpServer{
+	srv := &HTTPServer{
 		Port:        config.Port,
 		DataService: serverMongo,
 	}
@@ -56,19 +56,22 @@ func NewServer(config Config) (*HttpServer, error) {
 	return srv, nil
 }
 
-func (s *HttpServer) Run(ctx context.Context) error {
+func (s *HTTPServer) Run(ctx context.Context) error {
 	log.Printf("[INFO] Starting REST server on port: %d", s.Port)
+
+	const timeout = 30 * time.Second
 
 	router := s.router()
 	srv := http.Server{
 		Addr:         fmt.Sprintf(":%d", s.Port),
 		Handler:      router,
-		WriteTimeout: 30 * time.Second,
-		ReadTimeout:  30 * time.Second,
+		WriteTimeout: timeout,
+		ReadTimeout:  timeout,
 	}
 
 	go func() {
 		<-ctx.Done()
+
 		if e := srv.Close(); e != nil {
 			log.Printf("[WARN] failed to close http server, %v", e)
 		}
@@ -77,7 +80,7 @@ func (s *HttpServer) Run(ctx context.Context) error {
 	return srv.ListenAndServe()
 }
 
-func (s *HttpServer) router() *mux.Router {
+func (s *HTTPServer) router() *mux.Router {
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
 
@@ -86,18 +89,19 @@ func (s *HttpServer) router() *mux.Router {
 	return r
 }
 
-func (s *HttpServer) reserveKeyHandler(rw http.ResponseWriter, h *http.Request) {
+func (s *HTTPServer) reserveKeyHandler(rw http.ResponseWriter, h *http.Request) {
 	rw.Header().Add("Content-Type", "application/json")
 
 	key, err := s.DataService.ReserveKey(context.Background())
 	if err != nil {
 		rw.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(rw).Encode(struct{ Err string }{Err: err.Error()})
+		_ = json.NewEncoder(rw).Encode(struct{ Err string }{Err: err.Error()})
+
 		return
 	}
 
 	rw.WriteHeader(http.StatusOK)
-	json.NewEncoder(rw).Encode(&KeyCreatedResponse{Key: key})
+	_ = json.NewEncoder(rw).Encode(&KeyCreatedResponse{Key: key})
 }
 
 type loggingResponseWriter struct {
@@ -110,7 +114,7 @@ func (lrw *loggingResponseWriter) WriteHeader(code int) {
 	lrw.ResponseWriter.WriteHeader(code)
 }
 
-func NewLoggingResponseWriter(rw http.ResponseWriter) *loggingResponseWriter {
+func newLoggingResponseWriter(rw http.ResponseWriter) *loggingResponseWriter {
 	return &loggingResponseWriter{rw, http.StatusOK}
 }
 
@@ -118,7 +122,7 @@ func loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
 		log.Printf("[%s] %s", r.Method, r.URL.Path)
 
-		lrw := NewLoggingResponseWriter(rw)
+		lrw := newLoggingResponseWriter(rw)
 		next.ServeHTTP(lrw, r)
 
 		log.Printf("[%s] %s - %d", r.Method, r.URL.Path, lrw.statusCode)

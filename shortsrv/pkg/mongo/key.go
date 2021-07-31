@@ -25,11 +25,15 @@ type Config struct {
 	Password string
 }
 
+const ConnectionTimeout = 10 * time.Second
+const Timeout = 2 * time.Second
+
 func NewKeyRepository(config Config) (*KeyRepository, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), ConnectionTimeout)
 	defer cancel()
 
 	endpoint := fmt.Sprintf("mongodb://%s:%s@%s:27017", config.User, config.Password, config.Address)
+
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(endpoint))
 	if err != nil {
 		return nil, err
@@ -37,11 +41,12 @@ func NewKeyRepository(config Config) (*KeyRepository, error) {
 
 	mongo := &KeyRepository{}
 	mongo.coll = client.Database("shortener").Collection("keys_pool")
+
 	return mongo, nil
 }
 
 func (m *KeyRepository) ReserveKey(ctx context.Context) (string, error) {
-	ctx, cancel := context.WithTimeout(ctx, time.Second*2)
+	ctx, cancel := context.WithTimeout(ctx, Timeout)
 	defer cancel()
 
 	keys := m.coll
@@ -59,6 +64,11 @@ func (m *KeyRepository) ReserveKey(ctx context.Context) (string, error) {
 	}
 
 	result := &keyDto{}
-	key.Decode(&result)
+
+	err := key.Decode(&result)
+	if err != nil {
+		return "", key.Err()
+	}
+
 	return result.Value, nil
 }

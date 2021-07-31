@@ -11,5 +11,5 @@ RUN CGO_ENABLED=0 go build -o ./out/shortsrv ./cmd/shortsrv
 
 FROM alpine:latest
 COPY --from=builder /app/out/shortsrv /app/shortsrv
-EXPOSE 8081
+EXPOSE 80
 CMD ["/app/shortsrv"]

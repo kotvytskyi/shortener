@@ -16,7 +16,7 @@ func TestApiKeys(t *testing.T) {
 	ds := &MockedDataService{}
 	ds.On("ReserveKey", mock.Anything).Return("test", nil).Times(1)
 
-	httpServer := &HttpServer{DataService: ds}
+	httpServer := &HTTPServer{DataService: ds}
 	server := httptest.NewServer(httpServer.router())
 	defer server.Close()
 
