@@ -20,6 +20,9 @@ jobs:
       with:
         go-version: 1.16
         
+    - name: "Setup golangci-lint"
+      uses: nickhstr/action-setup-golangci-lint@v0.1.0
+        
     - name: Start containers
       run: docker-compose up -d
 
