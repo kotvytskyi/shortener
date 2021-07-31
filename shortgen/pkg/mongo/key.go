@@ -23,11 +23,15 @@ type Config struct {
 	Address  string
 }
 
+const ConnectionTimeout = time.Second * 10
+const Timeout = time.Second * 2
+
 func NewKeyRepository(config Config) (*KeyRepository, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	ctx, cancel := context.WithTimeout(context.Background(), ConnectionTimeout)
 	defer cancel()
 
 	endpoint := fmt.Sprintf("mongodb://%s:%s@%s:27017", config.Username, config.Password, config.Address)
+
 	client, err := mongo.Connect(ctx, options.Client().ApplyURI(endpoint))
 	if err != nil {
 		return nil, err
@@ -35,11 +39,12 @@ func NewKeyRepository(config Config) (*KeyRepository, error) {
 
 	mongo := &KeyRepository{}
 	mongo.coll = client.Database("shortener").Collection("keys_pool")
+
 	return mongo, nil
 }
 
 func (r *KeyRepository) Create(ctx context.Context, key string) error {
-	timeoutCtx, cancel := context.WithTimeout(ctx, time.Second*2)
+	timeoutCtx, cancel := context.WithTimeout(ctx, Timeout)
 	defer cancel()
 
 	dto := Key{Value: key}

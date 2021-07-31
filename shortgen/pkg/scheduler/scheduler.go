@@ -44,13 +44,15 @@ func NewScheduler(config Config) (*Scheduler, error) {
 func (s *Scheduler) Schedule(ctx context.Context) error {
 	log.Print("The scheduler has been started.")
 
-	ticker := time.NewTicker(time.Second * 5)
+	const tickInverval = time.Second * 5
+	ticker := time.NewTicker(tickInverval)
 
 	for {
 		select {
 		case <-ctx.Done():
 			ticker.Stop()
 			log.Print("The scheduler has been stopped.")
+
 			return nil
 		case <-ticker.C:
 			err := s.generator.Generate(ctx)
