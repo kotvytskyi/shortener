@@ -6,3 +6,7 @@ test:
 
 lint:
 	golangci-lint run
+
+ci:
+	make test
+	make lint
