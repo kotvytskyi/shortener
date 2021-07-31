@@ -20,21 +20,31 @@ jobs:
       with:
         go-version: 1.16
         
-    - name: "Setup golangci-lint"
-      uses: nickhstr/action-setup-golangci-lint@v0.1.0
+    - name: "Lint Frontend"
+      uses: golangci/golangci-lint-action@v2.5.2
       with:
-        version: 1.41.1
+        working-directory: ./frontend
+        
+    - name: "Lint Shortgen"
+      uses: golangci/golangci-lint-action@v2.5.2
+      with:
+        working-directory: ./shortgen
+        
+    - name: "Lint Shortsrv"
+      uses: golangci/golangci-lint-action@v2.5.2
+      with:
+        working-directory: ./shortsrv
         
     - name: Start containers
       run: docker-compose up -d
 
-    - name: Frontend
+    - name: CI Frontend
       run: make ci --directory ./frontend
     
-    - name: Shortgen
+    - name: CI Shortgen
       run: make ci --directory ./shortgen
     
-    - name: Shortsrv
+    - name: CI Shortsrv
       run: make ci --directory ./shortsrv
 
     - name: Stop containers
