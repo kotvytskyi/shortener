@@ -9,4 +9,7 @@ lint:
 
 ci:
 	make test
+
+dev:
+	make test
 	make lint
