@@ -1,4 +1,4 @@
-include ./cmd/shortsrv/.env
+-include ./cmd/shortsrv/.env
 export 
 
 test:
