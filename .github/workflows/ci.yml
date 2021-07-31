@@ -23,23 +23,14 @@ jobs:
     - name: Start containers
       run: docker-compose up -d
 
-    - name: Build frontend
-      run: cd ./frontend && go build ./...
+    - name: Frontend
+      run: make ci --directory ./frontend
     
-    - name: Test frontend
-      run: cd ./frontend && go test ./...
-
-    - name: Build shortgen
-      run: cd ./shortgen && go build ./...
+    - name: Shortgen
+      run: make ci --directory ./shortgen
     
-    - name: Test shortgen
-      run: cd ./shortgen && go test ./...
-
-    - name: Build shortsrv
-      run: cd ./shortsrv && go build ./...
-    
-    - name: Test shortsrv
-      run: cd ./shortsrv && go test ./...
+    - name: Shortsrv
+      run: make ci --directory ./shortsrv
 
     - name: Stop containers
       run: docker-compose down
