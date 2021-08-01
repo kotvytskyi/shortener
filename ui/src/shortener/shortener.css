@@ -11,3 +11,12 @@ section {
 .short {
     width: 150px;
 }
+
+p {
+    height: 40px;
+    line-height: 40px;
+}
+
+p > span {
+    height: 40px;
+}

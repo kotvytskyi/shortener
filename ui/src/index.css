@@ -6,11 +6,10 @@ body {
         'footer footer footer';
 
     grid-template-rows: 50px 2fr 1fr;
+    grid-template-columns: 1fr 4fr 1fr;
 
     width: 100vw;
     height: 100vh;
-
-    font-family: "Atlas Grotesk Web",sans-serif;
 }
 
 input {
@@ -31,4 +30,8 @@ body > section {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#app {
+    width: 100%;
 }
