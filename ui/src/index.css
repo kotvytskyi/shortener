@@ -1,0 +1,30 @@
+body {
+    display: grid;
+    grid-template-areas:
+        'header header header'
+        'left center right'
+        'footer footer footer';
+
+    grid-template-rows: 50px 2fr 1fr;
+
+    width: 100vw;
+    height: 100vh;
+
+    font-family: "Atlas Grotesk Web",sans-serif;
+}
+
+::placeholder{
+    font-family: "Atlas Grotesk Web",sans-serif;
+}
+
+body > header {
+    grid-area: header;
+    border-bottom: 1px groove;
+}
+
+body > section {
+    grid-area: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

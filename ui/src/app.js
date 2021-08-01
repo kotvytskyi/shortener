@@ -1,7 +1,8 @@
 import React from 'react'
+import { Shortener } from './shortener/shortener'
 
 const App = () => (
-    <h1>Hello world from React</h1>
+    <Shortener></Shortener>
 )
 
 export default App

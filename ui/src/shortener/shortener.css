@@ -1,0 +1,13 @@
+section {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 30px;
+    font-style: italic;
+}
+
+.long {
+    width: 70%;
+}
+
+.short {
+    width: 150px;
+}

@@ -1,0 +1,12 @@
+input {
+    outline: none;
+    border: none;
+    border-bottom: 1px dashed black;
+}
+
+::placeholder {
+    font-size: 1.5em;
+    font-style: italic;
+    font-weight: 100;
+    color: lightgray;
+}
