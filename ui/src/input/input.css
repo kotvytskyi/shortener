@@ -2,10 +2,11 @@ input {
     outline: none;
     border: none;
     border-bottom: 1px dashed black;
+    font-size: 30px;
+    font-style: italic;
 }
 
 ::placeholder {
-    font-size: 1.5em;
     font-style: italic;
     font-weight: 100;
     color: lightgray;

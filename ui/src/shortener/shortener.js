@@ -8,7 +8,7 @@ export const Shortener = () => (
             <b>As a</b> smart ass
         </p>
         <p>
-            <b>I want</b> <Input className="long" placeholder="this long url" />
+            <b>I want</b> <Input className="long" placeholder="this long url" autoFocus/>
         </p>
         <p>
             To be short <span>https://shortener.com/ <Input className="short" /></span>

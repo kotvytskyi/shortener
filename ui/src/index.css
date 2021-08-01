@@ -13,6 +13,10 @@ body {
     font-family: "Atlas Grotesk Web",sans-serif;
 }
 
+input {
+    font-family: "Atlas Grotesk Web",sans-serif;
+}
+
 ::placeholder{
     font-family: "Atlas Grotesk Web",sans-serif;
 }
