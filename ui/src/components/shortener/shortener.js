@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Input } from '../input/input'
 import { ShortInput } from '../shortInput/shortInput'
+import { ShortLink } from '../shortLink/shortLink';
 import { Button } from '../button/button';
 import ShortApi from '../../api/shortAPI';
 import validator from 'validator';
@@ -17,6 +18,8 @@ export const Shortener = () => {
     const [short, setShort] = useState(null)
     const [shortValid, setShortValid] = useState(false)
 
+    const [generatedUri, setGeneratedUri] = useState(null)
+
     const handleUriChange= (input) => {
         setUri(input.target.value);
     }
@@ -24,7 +27,7 @@ export const Shortener = () => {
     const handleGenerateShort = (longURI, short) => {
         ShortApi
             .generateShort(longURI, short)
-            .then(generatedShort => setShort(generatedShort))
+            .then(generated => setGeneratedUri(generated.URL))
     }
 
     const validateUri = uri => ({
@@ -52,6 +55,7 @@ export const Shortener = () => {
     }
 
     return (
+        !generatedUri ? 
         <section>
             <p>
                 <b>As a</b> smart ass
@@ -79,5 +83,8 @@ export const Shortener = () => {
                 <b>So that</b> it looks fancy. 
             </p>
             <Button text="Save" onClick={handleSubmit}/>
+        </section> : 
+        <section>
+            <ShortLink link={generatedUri} />
         </section>)
 }
