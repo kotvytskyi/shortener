@@ -46,7 +46,7 @@ export const Shortener = () => {
         setShortValid(shortValidation.valid)
         setShortErrorMessage(shortValidation.message)
 
-        if (uriValid && shortValid) {
+        if (uriValidation.valid && shortValidation.valid) {
             handleGenerateShort(uri, short)
         }
     }
