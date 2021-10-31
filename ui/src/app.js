@@ -1,5 +1,5 @@
 import React from 'react'
-import { Shortener } from './shortener/shortener'
+import { Shortener } from './components/shortener/shortener'
 
 const App = () => (
     <Shortener></Shortener>
