@@ -2,10 +2,10 @@ package mongo
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/kotvytskyi/frontend/pkg/config"
+	"github.com/kotvytskyi/frontend/pkg/shorter"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -47,7 +47,7 @@ func (r *Short) GetURL(ctx context.Context, short string) (string, error) {
 	err := r.Coll.FindOne(ctx, bson.M{"short": short}).Decode(&dto)
 
 	if err != nil && err == mongo.ErrNoDocuments {
-		return "", errors.New("no url found for the given short")
+		return "", &shorter.NotFoundError{}
 	}
 
 	return dto.URL, nil

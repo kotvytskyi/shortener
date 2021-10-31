@@ -25,3 +25,12 @@ func respondError(w http.ResponseWriter, status int, reason string) {
 
 	_ = json.NewEncoder(w).Encode(errResponse)
 }
+
+func respondOk(w http.ResponseWriter, url string) {
+	w.WriteHeader(http.StatusOK)
+	_ = json.NewEncoder(w).Encode((CreatedResponse{URL: url}))
+}
+
+func respondNotFound(w http.ResponseWriter) {
+	w.WriteHeader(http.StatusNotFound)
+}

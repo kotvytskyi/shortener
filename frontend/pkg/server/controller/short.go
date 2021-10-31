@@ -10,6 +10,7 @@ import (
 	"net/url"
 
 	"github.com/gorilla/mux"
+	"github.com/kotvytskyi/frontend/pkg/shorter"
 )
 
 type ShortService interface {
@@ -71,6 +72,28 @@ func (s *Short) CreateShort(w http.ResponseWriter, r *http.Request) {
 
 	sURL := s.service.CreateShortURL(r, short)
 	respondCreated(w, sURL)
+}
+
+func (s *Short) GetShort(w http.ResponseWriter, r *http.Request) {
+	short := mux.Vars(r)["short"]
+	if short == "" {
+		respondError(w, http.StatusNotFound, "short is empty")
+		return
+	}
+
+	url, err := s.service.GetURL(context.Background(), short)
+	if err != nil {
+		if errors.Is(err, &shorter.NotFoundError{}) {
+			respondNotFound(w)
+		} else {
+			log.Print(fmt.Sprintf("ERROR: %v", err))
+			respondError(w, http.StatusInternalServerError, "")
+		}
+
+		return
+	}
+
+	respondOk(w, url)
 }
 
 func (s *Short) ProxyShort(w http.ResponseWriter, r *http.Request) {

@@ -57,6 +57,7 @@ func (s *RestServer) router() *mux.Router {
 	r.Use(middleware.LoggingMiddleware)
 
 	r.HandleFunc("/api/shorts", s.controller.CreateShort).Methods("POST")
+	r.HandleFunc("/api/shorts/{short}", s.controller.GetShort).Methods("GET")
 	r.HandleFunc("/short/{short}", s.controller.ProxyShort).Methods("GET")
 
 	return r
