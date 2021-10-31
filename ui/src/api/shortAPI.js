@@ -1,9 +1,7 @@
-const baseURI = 'http://localhost:80/api'
-
 const ShortApi = {};
 
 ShortApi.generateShort = (originalURI, short) => {
-    return fetch(baseURI + '/shorts',
+    return fetch('/api/shorts',
     {
         method: 'POST',
         headers: {

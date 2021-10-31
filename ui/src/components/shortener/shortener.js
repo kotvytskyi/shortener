@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { Input } from '../input/input'
 import { ShortInput } from '../shortInput/shortInput'
-import { ShortLink } from '../shortLink/shortLink'
 import { Button } from '../button/button';
 import ShortApi from '../../api/shortAPI';
 
@@ -11,9 +10,10 @@ export const Shortener = () => {
     const [longURI, setLongUri] = useState(null)
     const [short, setShort] = useState(null)
 
-    const handleGenerateShort = (originalURI, short) => {
+    const handleGenerateShort = (longURI, short) => {
+        console.log(longURI, short);
         ShortApi
-            .generateShort(originalURI, short)
+            .generateShort(longURI, short)
             .then(generatedShort => setShort(generatedShort))
     }
 
@@ -23,18 +23,15 @@ export const Shortener = () => {
                 <b>As a</b> smart ass
             </p>
             <p>
-                <b>I want</b> <Input onChange={e => console.log(e.target.val)} className="long" placeholder="this long url" autoFocus/>
+                <b>I want</b> <Input onChange={e => setLongUri(e.target.value)} className="long" placeholder="this long url" autoFocus/>
             </p>
             <p>
                 <span>To be short </span>  
-                { !short ?  
-                    <ShortInput domain="https://shortener.com/" className="short" /> :
-                    <ShortLink link={ short }></ShortLink>
-                }
+                <ShortInput domain="https://shortener.com/" className="short" onChange={e => setShort(e.target.value)} />
             </p>
             <p>
                 <b>So that</b> it looks fancy. 
             </p>
-            <Button text="Save" onClick={() => generateShort("https://shortener.com/test")}/>
+            <Button text="Save" onClick={() => handleGenerateShort(longURI, short)}/>
         </section>)
 }
