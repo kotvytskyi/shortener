@@ -20,8 +20,13 @@ export const Shortener = () => {
 
     const [generatedUri, setGeneratedUri] = useState(null)
 
-    const handleUriChange= (input) => {
+    const handleUriChange = (input) => {
         setUri(input.target.value);
+    }
+
+    const handleShortChange = (input) => {
+        const value = input.target.value;
+        setShort(value)
     }
 
     const handleGenerateShort = (longURI, short) => {
@@ -50,7 +55,17 @@ export const Shortener = () => {
         setShortErrorMessage(shortValidation.message)
 
         if (uriValidation.valid && shortValidation.valid) {
-            handleGenerateShort(uri, short)
+
+            ShortApi.isShortExist(short).then(exist => {
+                setShortValid(!exist);
+                
+                if (exist) {
+                    setShortErrorMessage(`'${short}' is already used.`)
+                }
+                else {
+                    handleGenerateShort(uri, short)
+                }
+            });
         }
     }
 
@@ -62,22 +77,25 @@ export const Shortener = () => {
             </p>
             <div className="row">
                 <b>I want </b> 
-                <Input 
-                    isInvalid={!uriValid}
-                    errorMessage={uriErrorMessage}
-                    onChange={handleUriChange}
-                    className="long"
-                    placeholder="this long url"
-                    autoFocus/>
+                <div className="long-row">
+                    <Input 
+                        isInvalid={!uriValid}
+                        errorMessage={uriErrorMessage}
+                        onChange={handleUriChange}
+                        className="long"
+                        placeholder="this long url"
+                        autoFocus/>
+                </div>
             </div>
             <div className="row">
                 <span>To be short </span>  
-                <ShortInput
-                    domain="https://shortener.com/"
-                    className="short"
-                    isInvalid={!shortValid}
-                    errorMessage={shortErrorMessage}
-                    onChange={e => setShort(e.target.value)} />
+                    <ShortInput
+                        domain="https://shortener.com/"
+                        className="short"
+                        isInvalid={!shortValid}
+                        errorMessage={shortErrorMessage}
+                        maxLength={10}
+                        onChange={handleShortChange} />
             </div>
             <p>
                 <b>So that</b> it looks fancy. 
