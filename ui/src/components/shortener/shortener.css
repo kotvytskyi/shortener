@@ -4,12 +4,8 @@ section {
     font-style: italic;
 }
 
-.long {
-    width: 70%;
-}
-
 .short {
-    width: 150px;
+    width: 50%;
 }
 
 .row {
@@ -20,6 +16,7 @@ section {
 
 .long {
     text-align: center;
+    width: 100%;
 }
 
 .long-row {

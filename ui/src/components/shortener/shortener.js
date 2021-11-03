@@ -40,7 +40,7 @@ export const Shortener = () => {
         message: "URL is invalid"
     })
     const validateShort = short => ({
-        valid: short && validator.isLength(short, { min: 3, max: 10 }),
+        valid: !short || validator.isLength(short, { min: 3, max: 10 }),
         message: "Short length must be between 3 and 10 characters"
     })
 
@@ -56,16 +56,21 @@ export const Shortener = () => {
 
         if (uriValidation.valid && shortValidation.valid) {
 
-            ShortApi.isShortExist(short).then(exist => {
-                setShortValid(!exist);
-                
-                if (exist) {
-                    setShortErrorMessage(`'${short}' is already used.`)
-                }
-                else {
-                    handleGenerateShort(uri, short)
-                }
-            });
+            if (short) {
+                ShortApi.isShortExist(short).then(exist => {
+                    setShortValid(!exist);
+                    
+                    if (exist) {
+                        setShortErrorMessage(`'${short}' is already used.`)
+                    }
+                    else {
+                        handleGenerateShort(uri, short)
+                    }
+                });
+            }
+            else {
+                handleGenerateShort(uri, short)
+            }
         }
     }
 
@@ -90,7 +95,7 @@ export const Shortener = () => {
             <div className="row">
                 <span>To be short </span>  
                     <ShortInput
-                        domain="https://shortener.com/"
+                        domain="https://{your-domain}/"
                         className="short"
                         isInvalid={!shortValid}
                         errorMessage={shortErrorMessage}
@@ -100,7 +105,7 @@ export const Shortener = () => {
             <p>
                 <b>So that</b> it looks fancy. 
             </p>
-            <Button text="Save" onClick={handleSubmit}/>
+            <Button text="Go" onClick={handleSubmit}/>
         </section> : 
         <section>
             <ShortLink link={generatedUri} />
