@@ -1,4 +1,4 @@
-include ./cmd/frontend/.env
+-include ./cmd/frontend/.env
 export 
 
 test:
