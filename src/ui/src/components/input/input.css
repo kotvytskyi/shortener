@@ -1,0 +1,24 @@
+input {
+    outline: none;
+    border: none;
+    border-bottom: 1px dashed black;
+    font-size: 25px;
+    font-style: italic;
+}
+
+::placeholder {
+    font-style: italic;
+    font-weight: 100;
+    color: lightgray;
+}
+
+.container {
+    display: inline-block;
+    width: 100%;
+}
+
+.error_message {
+    position: absolute;
+    margin: -10px 0 !important;
+    font-size: 15px !important;
+}
