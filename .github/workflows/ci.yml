@@ -36,7 +36,7 @@ jobs:
         working-directory: ./src/shortsrv
         
     - name: Start containers
-      run: docker-compose up -d;
+      run: docker-compose -f ./src/docker-compose.yml up -d; sleep 1;
 
     - name: CI Frontend
       run: make ci --directory ./src/frontend
