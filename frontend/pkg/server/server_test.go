@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/kotvytskyi/frontend/pkg/mongo"
@@ -74,7 +75,10 @@ func TestApiShort(t *testing.T) {
 func CreateTestServer(t *testing.T, mockedShort string) (*RestServer, func()) {
 	t.Helper()
 
-	c, teardown := testmongo.CreateTestMongoConnection(t)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+
+	c, teardown := testmongo.CreateTestMongoConnection(ctx, t)
 
 	api := &MockedApi{mockedShort: mockedShort}
 	r := &mongo.Short{Coll: c}
