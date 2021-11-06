@@ -23,29 +23,29 @@ jobs:
     - name: "Lint Frontend"
       uses: golangci/golangci-lint-action@v2.5.2
       with:
-        working-directory: ./frontend
+        working-directory: ./src/frontend
         
     - name: "Lint Shortgen"
       uses: golangci/golangci-lint-action@v2.5.2
       with:
-        working-directory: ./shortgen
+        working-directory: ./src/shortgen
         
     - name: "Lint Shortsrv"
       uses: golangci/golangci-lint-action@v2.5.2
       with:
-        working-directory: ./shortsrv
+        working-directory: ./src/shortsrv
         
     - name: Start containers
       run: docker-compose up -d;
 
     - name: CI Frontend
-      run: make ci --directory ./frontend
+      run: make ci --directory ./src/frontend
     
     - name: CI Shortgen
-      run: make ci --directory ./shortgen
+      run: make ci --directory ./src/shortgen
     
     - name: CI Shortsrv
-      run: make ci --directory ./shortsrv
+      run: make ci --directory ./src/shortsrv
 
     - name: Stop containers
       run: docker-compose down
