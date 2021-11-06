@@ -3,13 +3,17 @@ package mongo
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/kotvytskyi/testmongo"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestCreate(t *testing.T) {
-	coll, teardown := testmongo.CreateTestMongoConnection(t)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*2)
+	defer cancel()
+
+	coll, teardown := testmongo.CreateTestMongoConnection(ctx, t)
 	defer teardown()
 
 	mongo := &KeyRepository{
