@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     env: 
       MONGO_USER: ${{ secrets.MONGO_USER }}
@@ -49,3 +49,19 @@ jobs:
 
     - name: Stop containers
       run: docker-compose down -f ./src/docker-compose.yml
+
+    - name: 'Build and push image'
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+    - run: |
+        docker build ./src/shortsrv -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${{ github.sha }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${{ github.sha }}
+
+        docker build ./src/shortgen . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${{ github.sha }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${{ github.sha }}
+
+        docker build ./src/frontend -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
