@@ -13,6 +13,9 @@ jobs:
       MONGO_USER: ${{ secrets.MONGO_USER }}
       MONGO_PASS: ${{ secrets.MONGO_PASS }}
     steps:
+    - name: Github Tag with semantic versioning
+      uses: hennejg/github-tag-action@v4.3.1
+      
     - uses: actions/checkout@v2
 
     - name: Set up Go
@@ -57,11 +60,9 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
     - run: |
-        docker build ./src/shortsrv -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${{ github.sha }}
+        docker build ./src/shortsrv -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${{ github.sha }}
-
         docker build ./src/shortgen . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${{ github.sha }}
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${{ github.sha }}
-
         docker build ./src/frontend -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
