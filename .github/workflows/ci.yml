@@ -63,7 +63,7 @@ jobs:
         echo GITHUB_REF - $ref
         docker build ./src/shortsrv -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${ref}
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${ref}
-        docker build ./src/shortgen . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${ref}
+        docker build ./src/shortgen -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${ref}
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${ref}
         docker build ./src/frontend -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${ref}
         docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${ref}
