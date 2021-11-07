@@ -13,9 +13,6 @@ jobs:
       MONGO_USER: ${{ secrets.MONGO_USER }}
       MONGO_PASS: ${{ secrets.MONGO_PASS }}
     steps:
-    - name: Github Tag with semantic versioning
-      uses: hennejg/github-tag-action@v4.3.1
-      
     - uses: actions/checkout@v2
 
     - name: Set up Go
@@ -59,10 +56,14 @@ jobs:
         login-server: ${{ secrets.REGISTRY_LOGIN_SERVER }}
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
+      env:
+        GITHUB_REF: ${{ github.ref}}
     - run: |
-        docker build ./src/shortsrv -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${{ github.sha }}
-        docker build ./src/shortgen . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${{ github.sha }}
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${{ github.sha }}
-        docker build ./src/frontend -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
-        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${{ github.sha }}
+        ref="$(echo ${GITHUB_REF} | cut -d'/' -f3)"
+        echo GITHUB_REF - $ref
+        docker build ./src/shortsrv -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${ref}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortsrv:${ref}
+        docker build ./src/shortgen . -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${ref}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/shortgen:${ref}
+        docker build ./src/frontend -t ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${ref}
+        docker push ${{ secrets.REGISTRY_LOGIN_SERVER }}/frontend:${ref}
