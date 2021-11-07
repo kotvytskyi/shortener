@@ -1,0 +1,26 @@
+global:
+  imagePullSecrets:
+  - name: ""
+  mongo:
+    user: ""
+    password: ""
+
+mongodb:
+  auth:
+    username: ""
+    database: ""
+
+shortsrv:
+  image:
+    repository: ""
+    tag: ""
+
+shortgen:
+  image:
+    repository: ""
+    tag: ""
+
+frontend:
+  image:
+    repository: ""
+    tag: ""

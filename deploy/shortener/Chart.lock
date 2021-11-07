@@ -1,0 +1,6 @@
+dependencies:
+- name: helpers
+  repository: file://lib/helpers
+  version: 1.0.0
+digest: sha256:b4080d81a0a92acce4f81e3734dd91ad01a18c8dfe14c112120d159434e10364
+generated: "2021-11-07T16:08:56.790783+02:00"

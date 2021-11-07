@@ -1,0 +1,7 @@
+apiVersion: v2
+name: helpers
+description: A Helm chart for Kubernetes
+
+type: library
+version: 1.0.0
+appVersion: "1.0.0"
